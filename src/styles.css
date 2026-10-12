@@ -334,21 +334,21 @@ a { color: inherit; }
 .outro__mono em { font-style: italic; color: var(--champagne-hi); margin: 0 4px; }
 
 /* ---------- share ---------- */
-.share { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 30px; }
-.share__btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 13px 20px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.35);
-  background: rgba(255,255,255,.08); color: #fff;
+.share { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 30px; }
+.share__label { font-size: 10px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+.share__label::before, .share__label::after { content: ''; display: inline-block; width: 18px; height: 1px; margin: 0 10px; vertical-align: middle; background: rgba(230,209,171,.5); }
+.share__icons { display: flex; gap: 12px; }
+.share__icon {
+  display: grid; place-items: center;
+  width: 46px; height: 46px; padding: 0; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.28);
+  background: rgba(255,255,255,.06); color: #fff;
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  font-size: 12px; font-weight: 600; letter-spacing: .06em; text-decoration: none;
-  transition: background .2s ease, transform .2s ease;
+  transition: background .25s ease, border-color .25s ease, color .25s ease, transform .2s ease;
 }
-.share__btn:hover { background: rgba(255,255,255,.16); }
-.share__btn:active { transform: scale(.97); }
-.share__btn svg { width: 17px; height: 17px; }
-.share__btn--wa { background: #25d366; border-color: #25d366; color: #fff; }
-.share__btn--wa:hover { background: #20bd5a; }
+.share__icon:hover { border-color: var(--champagne-hi); color: var(--champagne-hi); }
+.share__icon:active { transform: scale(.94); }
+.share__icon svg { width: 19px; height: 19px; }
 
 /* ---------- dock ---------- */
 .dock {
