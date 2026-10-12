@@ -7,7 +7,7 @@ export const defaults = {
   inviteText: 'Bir akvaryumun önünde başlayan hikâyemiz, şimdi en güzel bölümüne geliyor. Hayatımızı birleştirdiğimiz bu özel günde sizi de yanımızda görmek en büyük mutluluğumuz olacak.',
   hashtag: '#MuhammedİsmetVeTuğçe',
 
-  theme: 'siyah',
+  theme: 'romantik',
 
   // Bölümleri gizlemek/göstermek için
   sections: { story: true, program: true, gold: true, memories: true },

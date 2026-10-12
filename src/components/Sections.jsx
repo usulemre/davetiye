@@ -2,7 +2,7 @@ import { useSite } from '../site'
 import { formatDate, googleCalendarUrl, downloadICS } from '../date'
 import { useCountdown } from '../hooks'
 import Section from './Section'
-import { SplitText, Particles } from '../fx'
+import { SplitText, Particles, Floral } from '../fx'
 
 const calendarEvent = (config) => ({
   title: `${config.groom.first} & ${config.bride.first} · ${config.eventType}`,
@@ -17,7 +17,6 @@ export function Invite() {
   return (
     <Section id="davet" className="invite">
       <p className="kicker">Sevgili misafirimiz</p>
-      <span className="invite__quote" aria-hidden="true">“</span>
       <p className="invite__text">
         <SplitText text={config.inviteText} by="word" />
       </p>
@@ -38,6 +37,34 @@ export function Invite() {
   )
 }
 
+const WEEKDAYS = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz']
+
+// Düğünün olduğu ayın küçük takvimi; o gün kalple işaretli
+function Calendar({ d }) {
+  const year = Number(d.year)
+  const month = Number(d.month)
+  const day = Number(d.day)
+  const offset = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7
+  const days = new Date(Date.UTC(year, month, 0)).getUTCDate()
+  return (
+    <div className="cal">
+      <p className="cal__head">{d.monthName} {d.year}</p>
+      <div className="cal__grid">
+        {WEEKDAYS.map((w) => <span key={w} className="cal__wd">{w}</span>)}
+        {Array.from({ length: offset }, (_, i) => <span key={`e${i}`} />)}
+        {Array.from({ length: days }, (_, i) => (
+          <span key={i} className={i + 1 === day ? 'cal__day is-day' : 'cal__day'} style={{ '--i': i }}>
+            {i + 1 === day && (
+              <svg viewBox="0 0 32 30" aria-hidden="true"><path d="M16 28S2 19.5 2 10.2A7.2 7.2 0 0 1 16 7a7.2 7.2 0 0 1 14 3.2C30 19.5 16 28 16 28Z" /></svg>
+            )}
+            <b>{i + 1}</b>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function When() {
   const config = useSite()
   const event = calendarEvent(config)
@@ -46,15 +73,9 @@ export function When() {
   const units = [['Gün', c.days], ['Saat', c.hours], ['Dakika', c.minutes], ['Saniye', c.seconds]]
   return (
     <Section id="tarih" className="when">
-      <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
-      <p className="kicker kicker--gold">Kaydedin</p>
-      <div className="bigdate">
-        {[d.day, '/', d.month, '/', d.year.slice(2)].map((p, i) => (
-          <span key={i} className="bigdate__part" style={{ '--i': i }}>
-            {p === '/' ? <i>/</i> : <b>{p}</b>}
-          </span>
-        ))}
-      </div>
+      <p className="kicker">Kaydedin</p>
+      <h2 className="heading">Büyük <em>gün</em></h2>
+      <Calendar d={d} />
       <p className="when__line">{d.weekday} · Saat {d.time}</p>
 
       {c.done ? (
@@ -150,13 +171,16 @@ export function Outro({ onCopy, onAdmin, isAdmin }) {
 
   return (
     <footer id="son" className="outro">
-      <img className="outro__bg" src={config.outroPhoto} alt="" loading="lazy" />
-      <div className="outro__shade" />
-      <Particles kind="heart" count={14} />
+      <Particles kind="petal" count={10} />
+      <Floral className="outro__fl outro__fl--l" />
+      <Floral className="outro__fl outro__fl--r" />
       <div className="outro__content">
-        <p className="outro__text">Gelmeniz bizim için<br /><em>en büyük hediye.</em></p>
+        <p className="outro__text">Gelmeniz bizim için<br /><em>en büyük hediye</em></p>
         <p className="outro__small">(Ama altın da fena olmaz 😇)</p>
-        <p className="outro__mono">{config.initials[0]}<em>&amp;</em>{config.initials[1]}</p>
+        <div className="outro__arch">
+          <img src={config.outroPhoto} alt="" loading="lazy" />
+        </div>
+        <p className="outro__mono">{config.groom.first} <em>&amp;</em> {config.bride.first}</p>
         <div className="share">
           <span className="share__label">Davetiyeyi paylaş</span>
           <div className="share__icons">

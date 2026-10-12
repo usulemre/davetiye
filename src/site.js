@@ -2,6 +2,7 @@ import { createContext, useContext } from 'react'
 import { defaults } from './config'
 
 export const THEMES = {
+  romantik: { label: 'Romantik Pudra & Altın', ink: '#4b3a3a', paper: '#fffaf7', ivory: '#f9eeea', champagne: '#bf9a6a', champagneHi: '#efd5cb' },
   siyah: { label: 'Siyah & Şampanya', ink: '#141414', paper: '#fbf9f6', ivory: '#f6f2ec', champagne: '#b8976a', champagneHi: '#e6d1ab' },
   lacivert: { label: 'Gece Mavisi & Altın', ink: '#14203a', paper: '#f9f8f5', ivory: '#eef0f4', champagne: '#b08d4f', champagneHi: '#e3c992' },
   zumrut: { label: 'Zümrüt & Altın', ink: '#123227', paper: '#faf9f4', ivory: '#eef2ec', champagne: '#a8894e', champagneHi: '#e2cc97' },
@@ -13,7 +14,7 @@ export const THEMES = {
 const HEX = /^#[0-9a-f]{6}$/i
 
 export function themeColors(site) {
-  const base = THEMES[site.theme] || THEMES.siyah
+  const base = THEMES[site.theme] || THEMES.romantik
   const custom = site.customTheme || {}
   const pick = (k) => (HEX.test(custom[k] || '') ? custom[k] : base[k])
   return { ink: pick('ink'), paper: pick('paper'), ivory: pick('ivory'), champagne: pick('champagne'), champagneHi: pick('champagneHi') }

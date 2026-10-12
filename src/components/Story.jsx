@@ -12,7 +12,7 @@ export default function Story() {
     const el = track.current
     const card = el.firstElementChild
     if (!card) return
-    setActive(Math.round(el.scrollLeft / (card.offsetWidth + 14)))
+    setActive(Math.round(el.scrollLeft / (card.offsetWidth + 18)))
   }
 
   const go = (i) => {
