@@ -387,7 +387,9 @@ export function Tables({ store, notify }) {
               <span className="ttable__shadow" aria-hidden="true" />
               <RoundTable no={t} list={groups[t] || []} />
               <span className="ttable__no"><small>Masa</small>{t}</span>
-              {groups[t]?.length > 0 && <span className="ttable__side">{SIDE_NAME[tableSide(groups[t])]}</span>}
+              <span className={`ttable__side ${total(groups[t] || []) > CHAIRS ? 'is-over' : ''}`}>
+                {groups[t]?.length > 0 && `${SIDE_NAME[tableSide(groups[t])]} · `}{total(groups[t] || [])}/{CHAIRS}
+              </span>
             </button>
           ))}
           <button type="button" className="ttable ttable--new" onClick={addTable}>
@@ -451,30 +453,44 @@ export function Tables({ store, notify }) {
   )
 }
 
-// Yuvarlak masa: sandalyelerde oturanların baş harfleri, masanın çevresinde doluluk halkası
+// Yuvarlak masa (üstten görünüm): örtülü masa, masaya dönük sandalyeler, dolu yerlerde tabak ve kadeh
 function RoundTable({ no, list }) {
   const seats = list.flatMap((g, gi) => Array.from({ length: headcount(g) }, (_, k) => ({ g, gi, first: k === 0 })))
   const chairs = Math.max(CHAIRS, seats.length)
-  const fill = Math.min(1, seats.length / CHAIRS)
-  const C = 2 * Math.PI * 33
+  const at = (i, r) => {
+    const a = (i / chairs) * Math.PI * 2 - Math.PI / 2
+    return [70 + Math.cos(a) * r, 70 + Math.sin(a) * r, (a * 180) / Math.PI - 90]
+  }
   return (
     <svg className="tround" viewBox="0 0 140 140" aria-label={`Masa ${no}, ${seats.length} kişi`}>
       {Array.from({ length: chairs }, (_, i) => {
-        const a = (i / chairs) * Math.PI * 2 - Math.PI / 2
-        const x = 70 + Math.cos(a) * 56
-        const y = 70 + Math.sin(a) * 56
+        const [x, y, deg] = at(i, 53)
         const s = seats[i]
         return (
           <g key={i} className={`tchair ${s ? 'is-on' : ''} ${i >= CHAIRS ? 'is-over' : ''}`} style={{ '--i': i }}>
-            <circle cx={x} cy={y} r="10" style={s ? { fill: PALETTE[s.gi % PALETTE.length] } : undefined} />
-            {s?.first && <text x={x} y={y + 3.6}>{initial(s.g.name)}</text>}
+            <g transform={`translate(${x} ${y}) rotate(${deg})`}>
+              <rect className="tchair__back" x="-8.5" y="5" width="17" height="4.5" rx="2.2" />
+              <rect className="tchair__seat" x="-7.5" y="-7" width="15" height="13" rx="4"
+                style={s ? { fill: PALETTE[s.gi % PALETTE.length] } : undefined} />
+            </g>
+            {s?.first && <text x={x} y={y + 3.2}>{initial(s.g.name)}</text>}
           </g>
         )
       })}
+      <circle cx="70" cy="70" r="42" className="tround__drape" />
       <circle cx="70" cy="70" r="40" className="tround__top" />
-      <circle cx="70" cy="70" r="33" className="tround__track" />
-      {seats.length > 0 && <circle cx="70" cy="70" r="33" className={`tround__arc ${seats.length > CHAIRS ? 'is-over' : ''}`}
-        strokeDasharray={`${C * fill} ${C}`} transform="rotate(-90 70 70)" />}
+      <circle cx="70" cy="70" r="36.5" className="tround__hem" />
+      {seats.slice(0, chairs).map((_, i) => {
+        const [x, y] = at(i, 31)
+        const [gx, gy] = at(i + 0.32, 29)
+        return (
+          <g key={`p${i}`} className="tplate" style={{ '--i': i }}>
+            <circle cx={x} cy={y} r="4.6" />
+            <circle cx={x} cy={y} r="2.8" className="tplate__in" />
+            <circle cx={gx} cy={gy} r="1.5" className="tplate__glass" />
+          </g>
+        )
+      })}
       <g className="tround__flower" transform="translate(70 58)">
         <ellipse cx="-9" cy="6" rx="7" ry="3" transform="rotate(-25 -9 6)" className="leaf" />
         <ellipse cx="9" cy="6" rx="7" ry="3" transform="rotate(25 9 6)" className="leaf" />
