@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Section from './Section'
 
-const HASHTAG = '#İsmetTuğçeyeDaldı'
+const HASHTAG = '#MuhammedİsmetVeTuğçe'
 const NAME_KEY = 'davetiye:name'
 const LIKES_KEY = 'davetiye:likes'
 const ADMIN_KEY = 'davetiye:admin'
