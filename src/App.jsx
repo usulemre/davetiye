@@ -40,7 +40,7 @@ export default function App() {
         <Program />
         <Venue onCopy={handleCopy} />
         <Gold onCopy={handleCopy} />
-        <Outro />
+        <Outro onCopy={handleCopy} />
       </main>
       <nav className={`dock ${docked ? 'dock--show' : ''}`}>
         <a href="#hikaye">Hikâye</a>

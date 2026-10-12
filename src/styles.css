@@ -333,6 +333,23 @@ a { color: inherit; }
 .outro__mono { margin: 26px 0 0; font-family: var(--serif); font-size: 30px; letter-spacing: .1em; }
 .outro__mono em { font-style: italic; color: var(--champagne-hi); margin: 0 4px; }
 
+/* ---------- share ---------- */
+.share { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 30px; }
+.share__btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 20px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.08); color: #fff;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font-size: 12px; font-weight: 600; letter-spacing: .06em; text-decoration: none;
+  transition: background .2s ease, transform .2s ease;
+}
+.share__btn:hover { background: rgba(255,255,255,.16); }
+.share__btn:active { transform: scale(.97); }
+.share__btn svg { width: 17px; height: 17px; }
+.share__btn--wa { background: #25d366; border-color: #25d366; color: #fff; }
+.share__btn--wa:hover { background: #20bd5a; }
+
 /* ---------- dock ---------- */
 .dock {
   position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 20;
