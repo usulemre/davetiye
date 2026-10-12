@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useSite } from '../site'
 import { isLoginPath } from '../admin'
+import { formatDate } from '../date'
 
 export default function Intro({ onOpen }) {
   const config = useSite()
+  const d = formatDate(config.start)
   const [state, setState] = useState(() => (window.location.hash || isLoginPath() ? 'gone' : 'idle'))
 
   useEffect(() => {
@@ -15,33 +17,45 @@ export default function Intro({ onOpen }) {
   }, [])
 
   useEffect(() => {
-    document.documentElement.classList.toggle('locked', state === 'idle')
+    document.documentElement.classList.toggle('locked', state === 'idle' || state === 'opening')
   }, [state])
 
   const open = () => {
     if (state !== 'idle') return
     setState('opening')
     onOpen(true)
-    setTimeout(() => setState('gone'), 1400)
+    setTimeout(() => setState('leaving'), 1900)
+    setTimeout(() => setState('gone'), 2900)
   }
 
   if (state === 'gone') return null
 
   return (
-    <div className={`intro ${state === 'opening' ? 'intro--open' : ''}`} onClick={open}
+    <div className={`intro intro--${state}`} onClick={open}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open()}
       role="button" tabIndex={0} aria-label="Davetiyeyi aç">
-      <div className="intro__inner">
-        <p className="kicker kicker--light">Bir davetiyeniz var</p>
-        <svg className="intro__ring" viewBox="0 0 120 80" aria-hidden="true">
-          <circle cx="46" cy="40" r="26" />
-          <circle cx="74" cy="40" r="26" />
-        </svg>
-        <p className="intro__names">
-          {config.groom.first} <em>&amp;</em> {config.bride.first}
-        </p>
-        <span className="intro__btn">Aç</span>
+      <p className="kicker kicker--light intro__kicker">Bir davetiyeniz var</p>
+
+      <div className="env">
+        <div className="env__back" />
+        <div className="env__card">
+          <span className="env__card-kicker">{config.eventType}</span>
+          <p className="env__card-names">
+            {config.groom.first}<em>&amp;</em>{config.bride.first}
+          </p>
+          <span className="env__card-date">{d.day} · {d.month} · {d.year}</span>
+        </div>
+        <div className="env__pocket" />
+        <div className="env__flap" />
+        <span className="env__seal">
+          <span>Aç</span>
+        </span>
       </div>
+
+      <p className="intro__names">
+        {config.groom.first} <em>&amp;</em> {config.bride.first}
+      </p>
+      <p className="intro__hint">Mührü kırmak için dokunun</p>
     </div>
   )
 }
