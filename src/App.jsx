@@ -5,6 +5,7 @@ import Gate from './components/Gate'
 import Leaves from './components/Leaves'
 import Hero from './components/Hero'
 import Gold from './components/Gold'
+import Story from './components/Story'
 import Section from './components/Section'
 import { Invite, When, Program, Venue, Sprig } from './components/Details'
 
@@ -27,6 +28,7 @@ export default function App() {
       <main className={`page ${opened ? 'page--opened' : ''}`}>
         <Hero />
         <Invite />
+        <Story />
         <When />
         <Program />
         <Venue onCopy={handleCopy} />
