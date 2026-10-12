@@ -276,103 +276,155 @@ function EditGuest({ g, store, onDone }) {
 
 // ---------- Masa planı ----------
 const CHAIRS = 10
+const PALETTE = ['#d8a39d', '#a3b29a', '#c9a46c', '#a99bc4', '#8fb3c9', '#d4a5bf', '#b9a58f']
 const headcount = (g) => (statusOf(g) === 'yes' ? g.rsvp.count : g.seats)
 const total = (list) => list.reduce((n, g) => n + headcount(g), 0)
+const initial = (name) => name.trim().charAt(0).toLocaleUpperCase('tr')
 
 export function Tables({ store }) {
   const { guests } = store
+  const [sel, setSel] = useState(null)
+  const [extra, setExtra] = useState([])
   if (!guests) return <p className="ahint">Yükleniyor…</p>
+
   const active = guests.filter((g) => statusOf(g) !== 'no')
   const groups = {}
   for (const g of active) (groups[g.table || ''] ||= []).push(g)
-  const names = Object.keys(groups).filter(Boolean).sort(byTable)
+  const names = [...new Set([...Object.keys(groups).filter(Boolean), ...extra])].sort(byTable)
   const free = groups[''] || []
   const nextTable = String(Math.max(0, ...names.map(Number).filter(Number.isFinite)) + 1)
   const move = (g, table) => store.update({ id: g.id, table }, table ? `${g.name} → Masa ${table}` : `${g.name} masadan kaldırıldı`)
+  const addTable = () => { setExtra((x) => [...x, nextTable]); setSel(nextTable) }
 
   if (!active.length) return <p className="ahint">Henüz davetli yok. "Davetliler" sekmesinden ekleyebilirsin.</p>
 
+  const selList = sel ? groups[sel] || [] : []
+
   return (
-    <>
-      <p className="ahint">Misafirin yanındaki menüden masasını seç. "Geliyorum" diyen misafir masa numarasını kendi davetiyesinde görür. Gelmeyecekler burada yok.</p>
-      <div className="gstats">
-        <div><b>{names.length}</b><span>Masa</span></div>
-        <div><b>{total(active) - total(free)}</b><span>Yerleşen kişi</span></div>
-        <div className={free.length ? 'is-warn' : ''}><b>{total(free)}</b><span>Masasız kişi</span></div>
+    <div className="tplanwrap">
+      <div className="tsum">
+        <span><b>{names.length}</b> masa</span>
+        <span><b>{total(active) - total(free)}</b> kişi yerleşti</span>
+        <span className={free.length ? 'is-warn' : 'is-ok'}>{free.length ? <><b>{total(free)}</b> kişi bekliyor</> : '✓ Herkes yerleşti'}</span>
       </div>
 
-      {free.length > 0 && (
-        <section className="tfree">
-          <h4>Masası belli olmayanlar</h4>
+      <div className="tplan">
+        <div className="tplan__stage">Sahne · Dans pisti</div>
+        <div className="tplan__grid">
+          {names.map((t) => (
+            <button key={t} type="button" className={`ttable ${sel === t ? 'is-sel' : ''}`} onClick={() => setSel(sel === t ? null : t)}>
+              <RoundTable no={t} list={groups[t] || []} />
+            </button>
+          ))}
+          <button type="button" className="ttable ttable--new" onClick={addTable}>
+            <span>+</span>
+            <small>Yeni masa</small>
+          </button>
+        </div>
+      </div>
+
+      {sel && (
+        <section className="tdetail" key={sel}>
+          <header>
+            <div>
+              <span className="tdetail__kicker">Seçili masa</span>
+              <strong>Masa {sel}</strong>
+            </div>
+            <span className={`tdetail__pill ${total(selList) > CHAIRS ? 'is-over' : ''}`}>{total(selList)} / {CHAIRS}</span>
+            <button type="button" className="admin__icon" onClick={() => setSel(null)} aria-label="Kapat">×</button>
+          </header>
+          {selList.length === 0 && <p className="tdetail__empty">Masa boş. Aşağıdaki misafirlere dokunarak bu masaya oturt.</p>}
           <ul>
-            {free.map((g) => (
+            {selList.map((g, i) => (
               <li key={g.id}>
+                <i className="tavatar" style={{ background: PALETTE[i % PALETTE.length] }}>{initial(g.name)}</i>
                 <Person g={g} />
-                <TablePick g={g} names={names} next={nextTable} onPick={move} />
+                <TablePick g={g} names={names} next={nextTable} onPick={move} label="Taşı" />
               </li>
             ))}
           </ul>
         </section>
       )}
 
-      <div className="tgrid">
-        {names.map((t) => {
-          const list = groups[t]
-          const n = total(list)
-          return (
-            <section key={t} className={`tcard ${n > CHAIRS ? 'is-full' : ''}`}>
-              <RoundTable no={t} people={n} />
-              <p className="tcard__count">{n} / {CHAIRS} kişi{n > CHAIRS && ' · kalabalık'}</p>
-              <ul>
-                {list.map((g) => (
-                  <li key={g.id}>
-                    <Person g={g} small />
-                    <TablePick g={g} names={names} next={nextTable} onPick={move} compact />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )
-        })}
-      </div>
-    </>
+      {free.length > 0 && (
+        <section className="tfree">
+          <h4>{sel ? `Masa ${sel}'e eklemek için dokun` : 'Masası belli olmayanlar'}</h4>
+          {sel ? (
+            <div className="tchips">
+              {free.map((g) => (
+                <button key={g.id} type="button" className="tchip" onClick={() => move(g, sel)}>
+                  <i className="tavatar">{initial(g.name)}</i>
+                  {g.name}
+                  <small>{headcount(g)}</small>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <ul>
+              {free.map((g) => (
+                <li key={g.id}>
+                  <i className="tavatar">{initial(g.name)}</i>
+                  <Person g={g} />
+                  <TablePick g={g} names={names} next={nextTable} onPick={move} label="Masa seç" />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+      {!sel && <p className="ahint tplan__tip">İpucu: Bir masaya dokun, sonra misafirlere dokunarak o masaya oturt.</p>}
+    </div>
   )
 }
 
-// Yuvarlak masa ve etrafındaki sandalyeler: dolu olanlar renkli
-function RoundTable({ no, people }) {
-  const chairs = Math.max(CHAIRS, people)
+// Yuvarlak masa: sandalyelerde oturanların baş harfleri, masanın çevresinde doluluk halkası
+function RoundTable({ no, list }) {
+  const seats = list.flatMap((g, gi) => Array.from({ length: headcount(g) }, (_, k) => ({ g, gi, first: k === 0 })))
+  const chairs = Math.max(CHAIRS, seats.length)
+  const fill = Math.min(1, seats.length / CHAIRS)
+  const C = 2 * Math.PI * 33
   return (
-    <svg className="tround" viewBox="0 0 120 120" aria-label={`Masa ${no}, ${people} kişi`}>
+    <svg className="tround" viewBox="0 0 140 140" aria-label={`Masa ${no}, ${seats.length} kişi`}>
       {Array.from({ length: chairs }, (_, i) => {
         const a = (i / chairs) * Math.PI * 2 - Math.PI / 2
-        return <circle key={i} cx={60 + Math.cos(a) * 50} cy={60 + Math.sin(a) * 50} r="7.5"
-          className={i < people ? (i >= CHAIRS ? 'is-over' : 'is-on') : ''} style={{ '--i': i }} />
+        const x = 70 + Math.cos(a) * 56
+        const y = 70 + Math.sin(a) * 56
+        const s = seats[i]
+        return (
+          <g key={i} className={`tchair ${s ? 'is-on' : ''} ${i >= CHAIRS ? 'is-over' : ''}`} style={{ '--i': i }}>
+            <circle cx={x} cy={y} r="10" style={s ? { fill: PALETTE[s.gi % PALETTE.length] } : undefined} />
+            {s?.first && <text x={x} y={y + 3.6}>{initial(s.g.name)}</text>}
+          </g>
+        )
       })}
-      <circle cx="60" cy="60" r="36" className="tround__top" />
-      <text x="60" y="52" className="tround__label">MASA</text>
-      <text x="60" y="76" className="tround__no">{no.length > 3 ? no.slice(0, 3) : no}</text>
+      <circle cx="70" cy="70" r="40" className="tround__top" />
+      <circle cx="70" cy="70" r="33" className="tround__track" />
+      {seats.length > 0 && <circle cx="70" cy="70" r="33" className={`tround__arc ${seats.length > CHAIRS ? 'is-over' : ''}`}
+        strokeDasharray={`${C * fill} ${C}`} transform="rotate(-90 70 70)" />}
+      <text x="70" y="62" className="tround__label">MASA</text>
+      <text x="70" y="86" className="tround__no">{no.length > 3 ? no.slice(0, 3) : no}</text>
     </svg>
   )
 }
 
-function Person({ g, small }) {
+function Person({ g }) {
   const st = statusOf(g)
   return (
-    <span className={`tperson ${small ? 'tperson--s' : ''}`}>
+    <span className="tperson">
       <b>{g.name}</b>
-      <small className={st === 'yes' ? 'is-yes' : ''}>{st === 'yes' ? `✓ ${g.rsvp.count} kişi` : `Cevap yok · ${g.seats} kişi`}</small>
+      <small className={st === 'yes' ? 'is-yes' : ''}>{st === 'yes' ? `✓ ${g.rsvp.count} kişi geliyor` : `Cevap yok · ${g.seats} kişilik`}</small>
     </span>
   )
 }
 
-function TablePick({ g, names, next, onPick, compact }) {
+function TablePick({ g, names, next, onPick, label }) {
   return (
-    <select className={`tpick ${compact ? 'tpick--c' : ''}`} aria-label={`${g.name} masası`} value={g.table}
-      onChange={(e) => onPick(g, e.target.value)}>
-      <option value="">{compact ? 'Kaldır' : 'Masa seç'}</option>
-      {names.map((t) => <option key={t} value={t}>Masa {t}</option>)}
+    <select className="tpick" aria-label={`${g.name} masası`} value=""
+      onChange={(e) => onPick(g, e.target.value === '-' ? '' : e.target.value)}>
+      <option value="" disabled>{label}</option>
+      {names.filter((t) => t !== g.table).map((t) => <option key={t} value={t}>Masa {t}</option>)}
       {!names.includes(next) && <option value={next}>+ Yeni masa ({next})</option>}
+      {g.table && <option value="-">Masadan kaldır</option>}
     </select>
   )
 }
