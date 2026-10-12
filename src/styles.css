@@ -1200,7 +1200,7 @@ a { color: inherit; }
   background: linear-gradient(90deg, #ead8cf, #f3e6dd, #ead8cf); color: #8a6f62;
   font-size: 9.5px; font-weight: 700; letter-spacing: .26em; text-transform: uppercase; text-align: center;
 }
-.tplan__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 6px; justify-items: center; }
+.tplan__floor { padding: 4px 8px 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(136px, 1fr)); gap: 6px; justify-items: center; }
 .ttable {
   position: relative; display: grid; place-items: center; width: 100%; max-width: 150px; aspect-ratio: 1;
   padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer;
@@ -1223,8 +1223,6 @@ a { color: inherit; }
 .tround__track { fill: none; stroke: #f3ece6; stroke-width: 3; }
 .tround__arc { fill: none; stroke: var(--champagne); stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray .6s var(--ease); }
 .tround__arc.is-over { stroke: #e07a6a; }
-.tround__label { font: 700 7.5px var(--sans); letter-spacing: .24em; fill: #b39a80; text-anchor: middle; }
-.tround__no { font: 500 30px var(--serif); font-variant-numeric: lining-nums; fill: var(--tink); text-anchor: middle; }
 
 .tdetail { margin-bottom: 14px; padding: 14px; border-radius: 20px; background: #fff; border: 1px solid #efe5de; box-shadow: 0 16px 30px -24px rgba(75, 58, 58, .6); animation: rise .35s var(--ease); }
 .tdetail header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
@@ -1265,3 +1263,52 @@ a { color: inherit; }
 .tchip small { padding: 2px 7px; border-radius: 999px; background: #f6efe6; font-size: 11px; color: #8a6f4a; }
 .tchip:active { transform: scale(.95); }
 .tplan__tip { text-align: center; }
+
+/* masa üstü çiçek süsü, ayakta duran masa numarası, gölge */
+.tround__flower .petal { fill: #f3d3cc; stroke: #d8a39d; stroke-width: .6; }
+.tround__flower .leaf { fill: #b7c4ad; }
+.tround__flower .heart { fill: var(--champagne); }
+.ttable { transform-style: preserve-3d; }
+.ttable__shadow {
+  position: absolute; left: 14%; right: 14%; top: 18%; bottom: 10%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(75, 58, 58, .22), transparent);
+  transform: translate(6px, 12px); filter: blur(6px); pointer-events: none;
+}
+.ttable .tround { position: relative; }
+.ttable__no {
+  position: absolute; left: 50%; top: 55%; display: grid; place-items: center;
+  min-width: 30px; padding: 2px 8px 3px; border-radius: 9px;
+  background: #fff; border: 1px solid #ecdccd; color: var(--tink);
+  font: 500 16px/1 var(--serif); font-variant-numeric: lining-nums;
+  box-shadow: 0 6px 12px -6px rgba(75, 58, 58, .45);
+  transform: translateX(-50%); transform-origin: 50% 100%; transition: transform .5s var(--ease);
+}
+.ttable__no small { font: 700 6.5px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: #b39a80; margin-bottom: 1px; }
+.ttable__side {
+  position: absolute; left: 50%; bottom: -13px; transform: translateX(-50%); white-space: nowrap;
+  padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, .85); color: #9a8270;
+  font: 700 8.5px var(--sans); letter-spacing: .08em; text-transform: uppercase;
+}
+
+/* 3D: salon zemini eğik, masa numaraları ayakta */
+.tplan--3d { perspective: 900px; perspective-origin: 50% 0; padding-bottom: 6px; overflow: hidden; }
+.tplan__floor { transition: transform .7s var(--ease); transform-origin: 50% 0; transform-style: preserve-3d; }
+.tplan--3d .tplan__floor { transform: rotateX(34deg); }
+.tplan--3d .ttable__no { transform: translateX(-50%) translateZ(2px) rotateX(-34deg) translateY(-4px); }
+.tplan--3d .ttable__side { transform: translateX(-50%) rotateX(-34deg); transform-origin: 50% 100%; }
+.tplan--3d .ttable.is-sel { transform: translateZ(18px); }
+.tplan--3d .tplan__stage { transform: perspective(600px) rotateX(18deg); transform-origin: 50% 0; }
+
+/* araç çubuğu: otomatik oturt + görünüm */
+.tbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.tauto {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 14px;
+  border: 0; border-radius: 14px; color: #fff; font: 700 13.5px var(--sans); letter-spacing: .02em;
+  background: linear-gradient(120deg, #c9a46c, #d8a39d 60%, #c9a46c); background-size: 200% 100%;
+  box-shadow: 0 12px 24px -14px rgba(191, 154, 106, .9); animation: tautoShine 4s ease-in-out infinite;
+}
+.tauto:disabled { opacity: .6; }
+@keyframes tautoShine { 50% { background-position: 100% 0; } }
+.tview { flex: none; display: flex; margin-left: auto; padding: 3px; border-radius: 12px; background: #f3ede8; }
+.tview button { padding: 8px 12px; border: 0; border-radius: 9px; background: none; color: #8a7a6a; font: 700 12px var(--sans); }
+.tview button.is-on { background: #fff; color: var(--tink); box-shadow: 0 2px 6px -2px rgba(75, 58, 58, .3); }

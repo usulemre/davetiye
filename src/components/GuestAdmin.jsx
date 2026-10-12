@@ -281,10 +281,55 @@ const headcount = (g) => (statusOf(g) === 'yes' ? g.rsvp.count : g.seats)
 const total = (list) => list.reduce((n, g) => n + headcount(g), 0)
 const initial = (name) => name.trim().charAt(0).toLocaleUpperCase('tr')
 
-export function Tables({ store }) {
+const SIDE_ORDER = ['damat', 'gelin', '']
+const SIDE_NAME = { damat: 'Damat tarafı', gelin: 'Gelin tarafı', '': 'Ortak' }
+
+// Masa çoğunlukla hangi taraftan oluşuyor (boşsa null)
+function tableSide(list) {
+  const n = {}
+  for (const g of list) n[g.side || ''] = (n[g.side || ''] || 0) + headcount(g)
+  const best = Object.entries(n).sort((a, b) => b[1] - a[1])[0]
+  return best ? best[0] : null
+}
+
+// Masasız misafirleri taraflarına göre grupla, aileleri bölmeden boş yerlere dağıt
+function autoPlan(groups, tableNames) {
+  const names = [...tableNames]
+  const load = {}
+  const side = {}
+  for (const t of names) {
+    load[t] = total(groups[t] || [])
+    side[t] = tableSide(groups[t] || [])
+  }
+  let next = Math.max(0, ...names.map(Number).filter(Number.isFinite)) + 1
+  const moves = []
+  for (const sd of SIDE_ORDER) {
+    const list = (groups[''] || []).filter((g) => (g.side || '') === sd).sort((a, b) => headcount(b) - headcount(a))
+    for (const g of list) {
+      const h = headcount(g)
+      const fits = (t) => load[t] + h <= CHAIRS
+      let t = names.find((t) => (side[t] === sd || side[t] === null) && fits(t))
+      if (!t && sd === '') t = names.find(fits)
+      if (!t) {
+        t = String(next++)
+        names.push(t)
+        load[t] = 0
+        side[t] = null
+      }
+      load[t] += h
+      if (side[t] === null) side[t] = sd
+      moves.push([g, t])
+    }
+  }
+  return moves
+}
+
+export function Tables({ store, notify }) {
   const { guests } = store
   const [sel, setSel] = useState(null)
   const [extra, setExtra] = useState([])
+  const [flat, setFlat] = useState(false)
+  const [busy, setBusy] = useState(false)
   if (!guests) return <p className="ahint">Yükleniyor…</p>
 
   const active = guests.filter((g) => statusOf(g) !== 'no')
@@ -300,6 +345,20 @@ export function Tables({ store }) {
 
   const selList = sel ? groups[sel] || [] : []
 
+  const autoSeat = async () => {
+    const moves = autoPlan(groups, names)
+    const opened = new Set(moves.map(([, t]) => t).filter((t) => !names.includes(t))).size
+    const msg = `${moves.length} misafir (${total(moves.map(([g]) => g))} kişi) damat ve gelin tarafına göre masalara yerleştirilecek` +
+      `${opened ? `, ${opened} yeni masa açılacak` : ''}. Aileler bölünmez. Devam edilsin mi?`
+    if (!window.confirm(msg)) return
+    setBusy(true)
+    let ok = 0
+    for (const [g, t] of moves) if (await store.update({ id: g.id, table: t })) ok++
+    setBusy(false)
+    setExtra([])
+    notify(`${ok} misafir masalara yerleştirildi ✓ İstediğin gibi düzeltebilirsin`)
+  }
+
   return (
     <div className="tplanwrap">
       <div className="tsum">
@@ -308,12 +367,27 @@ export function Tables({ store }) {
         <span className={free.length ? 'is-warn' : 'is-ok'}>{free.length ? <><b>{total(free)}</b> kişi bekliyor</> : '✓ Herkes yerleşti'}</span>
       </div>
 
-      <div className="tplan">
+      <div className="tbar">
+        {free.length > 0 && (
+          <button type="button" className="tauto" disabled={busy} onClick={autoSeat}>
+            <span aria-hidden="true">✨</span>{busy ? 'Yerleştiriliyor…' : 'Otomatik oturt'}
+          </button>
+        )}
+        <div className="tview" role="group" aria-label="Görünüm">
+          <button type="button" className={flat ? '' : 'is-on'} onClick={() => setFlat(false)}>3D</button>
+          <button type="button" className={flat ? 'is-on' : ''} onClick={() => setFlat(true)}>Düz</button>
+        </div>
+      </div>
+
+      <div className={`tplan ${flat ? '' : 'tplan--3d'}`}>
         <div className="tplan__stage">Sahne · Dans pisti</div>
-        <div className="tplan__grid">
+        <div className="tplan__floor">
           {names.map((t) => (
             <button key={t} type="button" className={`ttable ${sel === t ? 'is-sel' : ''}`} onClick={() => setSel(sel === t ? null : t)}>
+              <span className="ttable__shadow" aria-hidden="true" />
               <RoundTable no={t} list={groups[t] || []} />
+              <span className="ttable__no"><small>Masa</small>{t}</span>
+              {groups[t]?.length > 0 && <span className="ttable__side">{SIDE_NAME[tableSide(groups[t])]}</span>}
             </button>
           ))}
           <button type="button" className="ttable ttable--new" onClick={addTable}>
@@ -401,8 +475,12 @@ function RoundTable({ no, list }) {
       <circle cx="70" cy="70" r="33" className="tround__track" />
       {seats.length > 0 && <circle cx="70" cy="70" r="33" className={`tround__arc ${seats.length > CHAIRS ? 'is-over' : ''}`}
         strokeDasharray={`${C * fill} ${C}`} transform="rotate(-90 70 70)" />}
-      <text x="70" y="62" className="tround__label">MASA</text>
-      <text x="70" y="86" className="tround__no">{no.length > 3 ? no.slice(0, 3) : no}</text>
+      <g className="tround__flower" transform="translate(70 58)">
+        <ellipse cx="-9" cy="6" rx="7" ry="3" transform="rotate(-25 -9 6)" className="leaf" />
+        <ellipse cx="9" cy="6" rx="7" ry="3" transform="rotate(25 9 6)" className="leaf" />
+        {[0, 72, 144, 216, 288].map((a) => <ellipse key={a} cx="0" cy="-5" rx="4" ry="6" transform={`rotate(${a})`} className="petal" />)}
+        <circle r="2.8" className="heart" />
+      </g>
     </svg>
   )
 }

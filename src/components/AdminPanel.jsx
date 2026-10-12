@@ -71,7 +71,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
 
       <div className="admin__body">
         {tab === 'davetli' && <GuestList store={guests} site={site} notify={notify} />}
-        {tab === 'masa' && <Tables store={guests} />}
+        {tab === 'masa' && <Tables store={guests} notify={notify} />}
         {tab === 'kapi' && <Gate store={guests} />}
         {tab === 'qr' && <QrCodes />}
         {tab === 'genel' && (
