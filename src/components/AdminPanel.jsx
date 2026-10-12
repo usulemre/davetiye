@@ -2,11 +2,15 @@ import { useRef, useState } from 'react'
 import { THEMES, themeColors } from '../site'
 import { shrink, uploadBlob } from '../images'
 import { changeCredentials } from '../admin'
+import { useGuests, GuestList, Tables, Gate, QrCodes } from './GuestAdmin'
 
 const TABS = [
+  ['davetli', 'Davetliler'], ['masa', 'Masalar'], ['kapi', 'Kapı girişi'], ['qr', 'QR kodlar'],
   ['genel', 'Genel'], ['tema', 'Renkler'], ['foto', 'Fotoğraflar'], ['hikaye', 'Hikâye'],
   ['program', 'Program'], ['mekan', 'Mekân'], ['altin', 'Altın / IBAN'], ['muzik', 'Müzik'], ['bolum', 'Bölümler'], ['hesap', 'Hesap'],
 ]
+// Bu sekmelerdeki değişiklikler anında kaydedilir (Kaydet butonu gerekmez)
+const LIVE = ['davetli', 'masa', 'kapi', 'qr']
 const EVENT_TYPES = ['Düğün', 'Nişan', 'Kına', 'Söz', 'Nikâh']
 const COLOR_FIELDS = [
   ['ink', 'Ana renk (koyu)'], ['paper', 'Arka plan'], ['ivory', 'İkincil arka plan'],
@@ -24,8 +28,9 @@ function nextDay(date) {
 }
 
 export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout, onClose, adminKey, dirty, saving, notify }) {
-  const [tab, setTab] = useState('genel')
+  const [tab, setTab] = useState('davetli')
   const [min, setMin] = useState(false)
+  const guests = useGuests(adminKey, notify)
 
   const set = (patch) => onChange({ ...site, ...patch })
   const setIn = (key, patch) => onChange({ ...site, [key]: { ...site[key], ...patch } })
@@ -65,6 +70,10 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
       </nav>
 
       <div className="admin__body">
+        {tab === 'davetli' && <GuestList store={guests} site={site} notify={notify} />}
+        {tab === 'masa' && <Tables store={guests} />}
+        {tab === 'kapi' && <Gate store={guests} />}
+        {tab === 'qr' && <QrCodes />}
         {tab === 'genel' && (
           <>
             <Group title="Damat">
@@ -93,6 +102,8 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             <Group title="Metinler">
               <Field label="Davet metni" textarea value={site.inviteText} onChange={(v) => set({ inviteText: v })} />
               <Field label="Etiket (hashtag)" value={site.hashtag} onChange={(v) => set({ hashtag: v })} />
+              <Field label="Katılım bildirimi son tarihi" value={site.rsvpDeadline} onChange={(v) => set({ rsvpDeadline: v })}
+                hint='Ör. "1 Kasım". Boş bırakılırsa tarih yazılmaz.' />
             </Group>
           </>
         )}
@@ -200,7 +211,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
 
         {tab === 'bolum' && (
           <Group title="Görünen bölümler">
-            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['gold', 'Altın köşesi / IBAN'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
+            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['rsvp', 'Katılım bildirimi (LCV)'], ['gold', 'Altın köşesi / IBAN'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
               <label key={k} className="atoggle">
                 <input type="checkbox" checked={site.sections[k] !== false}
                   onChange={(e) => setIn('sections', { [k]: e.target.checked })} />
@@ -214,12 +225,12 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
 
       <footer className="admin__foot">
         <button type="button" className="alink" onClick={onLogout}>Yönetici modundan çık</button>
-        <div>
+        {LIVE.includes(tab) && !dirty ? <span className="admin__live">Anında kaydedilir</span> : <div>
           <button type="button" className="abtn abtn--ghost" disabled={!dirty || saving} onClick={onCancel}>Vazgeç</button>
           <button type="button" className="abtn" disabled={!dirty || saving} onClick={onSave}>
             {saving ? 'Kaydediliyor…' : 'Kaydet'}
           </button>
-        </div>
+        </div>}
       </footer>
     </aside>
   )

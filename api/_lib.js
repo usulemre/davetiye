@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto'
 import { Redis } from '@upstash/redis'
 
 let redis
@@ -44,4 +45,29 @@ export function isOurBlob(url) {
   } catch {
     return false
   }
+}
+
+// Davetli listesi: Redis hash'inde id → davetli kaydı
+export const GUESTS = `${process.env.DATA_PREFIX || ''}guests`
+export const MAX_GUESTS = 1500
+
+// Kişiye özel link kodu (karışan harfler olmadan)
+const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'
+export function guestId() {
+  return Array.from(randomBytes(10), (b) => ALPHABET[b % ALPHABET.length]).join('')
+}
+
+// Türkiye numaralarını WhatsApp biçimine çevir: 0532… → 90532…
+export function cleanPhone(value) {
+  let d = String(value ?? '').replace(/\D/g, '')
+  if (d.startsWith('00')) d = d.slice(2)
+  if (d.length === 11 && d[0] === '0') d = `9${d}`
+  if (d.length === 10 && d[0] === '5') d = `90${d}`
+  return d.slice(0, 15)
+}
+
+export function cleanRsvp(input, seats) {
+  if (!input || !['yes', 'no'].includes(input.status)) return null
+  const count = input.status === 'yes' ? Math.min(seats, Math.max(1, Math.round(Number(input.count) || 1))) : 0
+  return { status: input.status, count, note: clean(input.note, 300), at: Date.now() }
 }

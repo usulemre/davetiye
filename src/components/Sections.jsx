@@ -12,11 +12,11 @@ const calendarEvent = (config) => ({
   details: 'Sizi de aramızda görmek istiyoruz 🤍',
 })
 
-export function Invite() {
+export function Invite({ guestName }) {
   const config = useSite()
   return (
     <Section id="davet" className="invite">
-      <p className="kicker">Sevgili misafirimiz</p>
+      <p className="kicker">Sevgili {guestName || 'misafirimiz'}</p>
       <p className="invite__text">
         <SplitText text={config.inviteText} by="word" />
       </p>

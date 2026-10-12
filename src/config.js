@@ -10,7 +10,10 @@ export const defaults = {
   theme: 'romantik',
 
   // Bölümleri gizlemek/göstermek için
-  sections: { story: true, program: true, gold: true, memories: true },
+  sections: { story: true, program: true, rsvp: true, gold: true, memories: true },
+
+  // Katılım bildirimi için son tarih (ör. "1 Kasım"); boşsa yazılmaz
+  rsvpDeadline: '',
 
   // ⚠️ TARİHİ GÜNCELLEYİN — yerel saat (Türkiye, +03:00)
   start: '2026-11-21T19:00:00+03:00',

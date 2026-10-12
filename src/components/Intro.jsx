@@ -5,7 +5,7 @@ import { formatDate } from '../date'
 
 const rand = (a, b) => a + Math.random() * (b - a)
 
-export default function Intro({ onOpen }) {
+export default function Intro({ onOpen, guestName }) {
   const config = useSite()
   const d = formatDate(config.start)
   const [state, setState] = useState(() => (window.location.hash || isLoginPath() ? 'gone' : 'idle'))
@@ -52,7 +52,9 @@ export default function Intro({ onOpen }) {
         ))}
       </div>
 
-      <p className="kicker kicker--light intro__kicker">Bir davetiyeniz var</p>
+      <p className="kicker kicker--light intro__kicker">
+        {guestName ? <>Sevgili {guestName},<br />bir davetiyeniz var</> : 'Bir davetiyeniz var'}
+      </p>
 
       <div className="env">
         <div className="env__glow" />

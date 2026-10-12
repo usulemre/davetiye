@@ -11,6 +11,9 @@ import Gold from './components/Gold'
 import Memories from './components/Memories'
 import AdminPanel from './components/AdminPanel'
 import Login from './components/Login'
+import Rsvp from './components/Rsvp'
+import GateBar from './components/GateBar'
+import { myCode, linkCode, fetchGuest } from './guests'
 import { Invite, When, Program, Venue, Outro } from './components/Sections'
 
 // Kaydedilecek veriden türetilmiş alanları çıkar
@@ -26,6 +29,7 @@ export default function App() {
   const [opened, setOpened] = useState(false)
   const [toast, setToast] = useState(null)
   const [docked, setDocked] = useState(false)
+  const [guest, setGuest] = useState(null)
   const timer = useRef()
   const music = useRef(null)
   const bar = useRef(null)
@@ -39,6 +43,11 @@ export default function App() {
       .then((d) => setSaved(d.config || {}))
       .catch(() => setSaved({}))
       .finally(() => clearTimeout(fallback))
+  }, [])
+
+  // Kişiye özel linkle gelen misafir
+  useEffect(() => {
+    fetchGuest(myCode()).then(setGuest)
   }, [])
 
   // Yönetici anahtarı geçerliyse paneli aç
@@ -113,29 +122,34 @@ export default function App() {
 
   return (
     <SiteContext.Provider value={site}>
-      <Intro onOpen={(fromTap) => { setOpened(true); if (fromTap) music.current?.play() }} />
+      <Intro guestName={guest?.name} onOpen={(fromTap) => { setOpened(true); if (fromTap) music.current?.play() }} />
       <div className="progress" ref={bar} aria-hidden="true" />
       <Music key={site.music} ref={music} />
       <main className={`page ${opened ? 'page--opened' : ''}`}>
         <Hero />
-        <Invite />
+        <Invite guestName={guest?.name} />
         {show.story !== false && site.story?.length > 0 && <Story />}
         <div className="bento">
           <When />
           {show.program !== false && <Program />}
           <Venue onCopy={handleCopy} />
         </div>
+        {show.rsvp !== false && <Rsvp guest={guest} onGuest={setGuest} notify={notify} />}
         {show.gold !== false && <Gold onCopy={handleCopy} />}
         {show.memories !== false && <Memories notify={notify} admin={admin} />}
         <Outro onCopy={handleCopy} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>
       <nav className={`dock ${docked && !editing ? 'dock--show' : ''}`}>
+        {show.rsvp !== false && <a href="#lcv" className="dock__rsvp">Katılım</a>}
         <a href="#tarih">Tarih</a>
         <a href="#konum">Konum</a>
         {show.memories !== false && <a href="#anilar">Anılar</a>}
         {show.gold !== false && <a href="#altin" className="dock__gold">Altın</a>}
       </nav>
 
+      {admin && linkCode() && guest && !editing && (
+        <GateBar guest={guest} adminKey={admin} onGuest={setGuest} notify={notify} />
+      )}
       {admin && !editing && (
         <button type="button" className="admin-fab" onClick={() => setEditing(true)}>
           ✎ Düzenle
