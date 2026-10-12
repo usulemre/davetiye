@@ -275,6 +275,10 @@ function EditGuest({ g, store, onDone }) {
 }
 
 // ---------- Masa planı ----------
+const CHAIRS = 10
+const headcount = (g) => (statusOf(g) === 'yes' ? g.rsvp.count : g.seats)
+const total = (list) => list.reduce((n, g) => n + headcount(g), 0)
+
 export function Tables({ store }) {
   const { guests } = store
   if (!guests) return <p className="ahint">Yükleniyor…</p>
@@ -282,42 +286,94 @@ export function Tables({ store }) {
   const groups = {}
   for (const g of active) (groups[g.table || ''] ||= []).push(g)
   const names = Object.keys(groups).filter(Boolean).sort(byTable)
-  const people = (list) => list.reduce((n, g) => n + (statusOf(g) === 'yes' ? g.rsvp.count : g.seats), 0)
+  const free = groups[''] || []
+  const nextTable = String(Math.max(0, ...names.map(Number).filter(Number.isFinite)) + 1)
+  const move = (g, table) => store.update({ id: g.id, table }, table ? `${g.name} → Masa ${table}` : `${g.name} masadan kaldırıldı`)
+
+  if (!active.length) return <p className="ahint">Henüz davetli yok. "Davetliler" sekmesinden ekleyebilirsin.</p>
 
   return (
     <>
-      <p className="ahint">Misafirin masasını yazman yeterli. "Geliyorum" diyen misafir, kendi davetiyesinde masa numarasını ve giriş kartını görür. Gelmeyecekler listede yok.</p>
-      {[...names, ''].filter((t) => groups[t]).map((t) => (
-        <section key={t || 'none'} className={`gtable ${t ? '' : 'gtable--none'}`}>
-          <header>
-            <strong>{t ? `Masa ${t}` : 'Masası belli olmayanlar'}</strong>
-            <span>{people(groups[t])} kişi</span>
-          </header>
+      <p className="ahint">Misafirin yanındaki menüden masasını seç. "Geliyorum" diyen misafir masa numarasını kendi davetiyesinde görür. Gelmeyecekler burada yok.</p>
+      <div className="gstats">
+        <div><b>{names.length}</b><span>Masa</span></div>
+        <div><b>{total(active) - total(free)}</b><span>Yerleşen kişi</span></div>
+        <div className={free.length ? 'is-warn' : ''}><b>{total(free)}</b><span>Masasız kişi</span></div>
+      </div>
+
+      {free.length > 0 && (
+        <section className="tfree">
+          <h4>Masası belli olmayanlar</h4>
           <ul>
-            {groups[t].map((g) => (
+            {free.map((g) => (
               <li key={g.id}>
-                <span>
-                  {g.name}
-                  <small>{statusOf(g) === 'yes' ? `${g.rsvp.count} kişi geliyor` : `cevap yok · ${g.seats} kişilik`}</small>
-                </span>
-                <TableInput g={g} store={store} />
+                <Person g={g} />
+                <TablePick g={g} names={names} next={nextTable} onPick={move} />
               </li>
             ))}
           </ul>
         </section>
-      ))}
-      {!active.length && <p className="ahint">Henüz davetli yok. "Davetliler" sekmesinden ekleyebilirsin.</p>}
+      )}
+
+      <div className="tgrid">
+        {names.map((t) => {
+          const list = groups[t]
+          const n = total(list)
+          return (
+            <section key={t} className={`tcard ${n > CHAIRS ? 'is-full' : ''}`}>
+              <RoundTable no={t} people={n} />
+              <p className="tcard__count">{n} / {CHAIRS} kişi{n > CHAIRS && ' · kalabalık'}</p>
+              <ul>
+                {list.map((g) => (
+                  <li key={g.id}>
+                    <Person g={g} small />
+                    <TablePick g={g} names={names} next={nextTable} onPick={move} compact />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        })}
+      </div>
     </>
   )
 }
 
-function TableInput({ g, store }) {
-  const [v, setV] = useState(g.table)
-  useEffect(() => setV(g.table), [g.table])
-  const commit = () => v.trim() !== g.table && store.update({ id: g.id, table: v.trim() }, v.trim() ? `${g.name} → Masa ${v.trim()}` : 'Masa kaldırıldı')
+// Yuvarlak masa ve etrafındaki sandalyeler: dolu olanlar renkli
+function RoundTable({ no, people }) {
+  const chairs = Math.max(CHAIRS, people)
   return (
-    <input className="gtable__in" aria-label={`${g.name} masa`} placeholder="Masa" value={v}
-      onChange={(e) => setV(e.target.value)} onBlur={commit} onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()} />
+    <svg className="tround" viewBox="0 0 120 120" aria-label={`Masa ${no}, ${people} kişi`}>
+      {Array.from({ length: chairs }, (_, i) => {
+        const a = (i / chairs) * Math.PI * 2 - Math.PI / 2
+        return <circle key={i} cx={60 + Math.cos(a) * 50} cy={60 + Math.sin(a) * 50} r="7.5"
+          className={i < people ? (i >= CHAIRS ? 'is-over' : 'is-on') : ''} style={{ '--i': i }} />
+      })}
+      <circle cx="60" cy="60" r="36" className="tround__top" />
+      <text x="60" y="52" className="tround__label">MASA</text>
+      <text x="60" y="76" className="tround__no">{no.length > 3 ? no.slice(0, 3) : no}</text>
+    </svg>
+  )
+}
+
+function Person({ g, small }) {
+  const st = statusOf(g)
+  return (
+    <span className={`tperson ${small ? 'tperson--s' : ''}`}>
+      <b>{g.name}</b>
+      <small className={st === 'yes' ? 'is-yes' : ''}>{st === 'yes' ? `✓ ${g.rsvp.count} kişi` : `Cevap yok · ${g.seats} kişi`}</small>
+    </span>
+  )
+}
+
+function TablePick({ g, names, next, onPick, compact }) {
+  return (
+    <select className={`tpick ${compact ? 'tpick--c' : ''}`} aria-label={`${g.name} masası`} value={g.table}
+      onChange={(e) => onPick(g, e.target.value)}>
+      <option value="">{compact ? 'Kaldır' : 'Masa seç'}</option>
+      {names.map((t) => <option key={t} value={t}>Masa {t}</option>)}
+      {!names.includes(next) && <option value={next}>+ Yeni masa ({next})</option>}
+    </select>
   )
 }
 
