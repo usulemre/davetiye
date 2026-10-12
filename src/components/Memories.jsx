@@ -22,18 +22,58 @@ function timeAgo(ts) {
   return rtf.format(Math.round(s / div), unit)
 }
 
+// Fotoğrafı tarayıcının açabileceği bir görsele çevir
+async function decode(file) {
+  if ('createImageBitmap' in window) {
+    try {
+      return await createImageBitmap(file, { imageOrientation: 'from-image' })
+    } catch {
+      // eski Safari seçenekleri desteklemiyor ya da format açılamadı, <img> ile dene
+    }
+  }
+  const url = URL.createObjectURL(file)
+  try {
+    const img = new Image()
+    img.src = url
+    await img.decode()
+    return img
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
 // Fotoğrafı yüklemeden önce küçült (hızlı yükleme + az depolama)
 async function shrink(file, max = 1600) {
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
-  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height))
-  const w = Math.round(bitmap.width * scale)
-  const h = Math.round(bitmap.height * scale)
+  let source
+  try {
+    source = await decode(file)
+  } catch {
+    // Tarayıcı açamadı (ör. HEIC). JPEG/PNG/WebP ise olduğu gibi yükle
+    if (/^image\/(jpeg|png|webp)$/.test(file.type)) return { blob: file, width: 0, height: 0 }
+    const err = new Error('Bu fotoğraf formatı desteklenmiyor. Ekran görüntüsü alıp onu yüklemeyi deneyin 🙏')
+    err.step = 'decode'
+    throw err
+  }
+  const sw = source.width || source.naturalWidth
+  const sh = source.height || source.naturalHeight
+  const scale = Math.min(1, max / Math.max(sw, sh))
+  const w = Math.round(sw * scale)
+  const h = Math.round(sh * scale)
   const canvas = document.createElement('canvas')
   canvas.width = w
   canvas.height = h
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h)
+  canvas.getContext('2d').drawImage(source, 0, 0, w, h)
   const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.84))
+  if (!blob) return { blob: file, width: sw, height: sh }
   return { blob, width: w, height: h }
+}
+
+function report(step, err, file) {
+  fetch('/api/log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ step, message: err?.message || String(err), file: file ? `${file.type} ${file.size}` : '' }),
+  }).catch(() => {})
 }
 
 async function api(path, options = {}) {
@@ -162,6 +202,7 @@ export default function Memories({ notify }) {
 
 function Composer({ name, onName, onPosted, notify }) {
   const input = useRef(null)
+  const nameInput = useRef(null)
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [caption, setCaption] = useState('')
@@ -174,6 +215,7 @@ function Composer({ name, onName, onPosted, notify }) {
     if (!f.type.startsWith('image/')) return notify('Sadece fotoğraf yükleyebilirsiniz')
     setFile(f)
     setPreview(URL.createObjectURL(f))
+    if (!name.trim()) setTimeout(() => nameInput.current?.focus(), 50)
   }
 
   const reset = () => {
@@ -187,14 +229,19 @@ function Composer({ name, onName, onPosted, notify }) {
   const submit = async (e) => {
     e.preventDefault()
     if (!file) return input.current?.click()
-    if (!name.trim()) return notify('Önce adını yaz 🙂')
+    if (!name.trim()) {
+      nameInput.current?.focus()
+      return notify('Önce adını yaz 🙂')
+    }
     setBusy(true)
     try {
       const [{ blob, width, height }, { upload }] = await Promise.all([shrink(file), import('@vercel/blob/client')])
-      const uploaded = await upload(`anilar/${Date.now()}.jpg`, blob, {
+      const type = blob.type || 'image/jpeg'
+      const ext = type.split('/')[1] === 'jpeg' ? 'jpg' : type.split('/')[1]
+      const uploaded = await upload(`anilar/${Date.now()}.${ext}`, blob, {
         access: 'public',
         handleUploadUrl: '/api/upload',
-        contentType: 'image/jpeg',
+        contentType: type,
         onUploadProgress: ({ percentage }) => setProgress(percentage),
       })
       const body = { url: uploaded.url, name, caption, width, height }
@@ -203,7 +250,8 @@ function Composer({ name, onName, onPosted, notify }) {
       notify('Paylaşıldı! 🎉')
       reset()
     } catch (err) {
-      notify(err.message || 'Yüklenemedi, tekrar deneyin')
+      report(err.step || 'upload', err, file)
+      notify(err.step ? err.message : 'Yüklenemedi, internetini kontrol edip tekrar dene')
     } finally {
       setBusy(false)
     }
@@ -225,13 +273,13 @@ function Composer({ name, onName, onPosted, notify }) {
         </button>
       )}
       <div className="composer__fields">
-        <input className="field" placeholder="Adın" value={name} maxLength={40}
+        <input ref={nameInput} className="field" placeholder="Adın" value={name} maxLength={40}
           onChange={(e) => onName(e.target.value)} />
         <input className="field" placeholder="Bir not bırak (isteğe bağlı)" value={caption} maxLength={300}
           onChange={(e) => setCaption(e.target.value)} />
       </div>
       <button className="btn btn--solid composer__submit" type="submit" disabled={busy}>
-        {busy ? `Yükleniyor… %${Math.round(progress)}` : file ? 'Paylaş' : 'Fotoğraf seç'}
+        {busy ? `Yükleniyor… %${Math.round(progress)}` : file ? 'Paylaş →' : 'Fotoğraf seç'}
       </button>
     </form>
   )
