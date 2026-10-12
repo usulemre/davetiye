@@ -5,6 +5,7 @@ import Music from './components/Music'
 import Hero from './components/Hero'
 import Story from './components/Story'
 import Gold from './components/Gold'
+import Memories from './components/Memories'
 import { Invite, When, Program, Venue, Outro } from './components/Sections'
 
 export default function App() {
@@ -21,12 +22,16 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const handleCopy = useCallback(async (text, message) => {
-    const ok = await copyText(text)
-    setToast(ok ? message : 'Kopyalanamadı, elle seçip kopyalayabilirsiniz')
+  const notify = useCallback((message) => {
+    setToast(message)
     clearTimeout(timer.current)
     timer.current = setTimeout(() => setToast(null), 2600)
   }, [])
+
+  const handleCopy = useCallback(async (text, message) => {
+    const ok = await copyText(text)
+    notify(ok ? message : 'Kopyalanamadı, elle seçip kopyalayabilirsiniz')
+  }, [notify])
 
   return (
     <>
@@ -40,12 +45,13 @@ export default function App() {
         <Program />
         <Venue onCopy={handleCopy} />
         <Gold onCopy={handleCopy} />
+        <Memories notify={notify} />
         <Outro onCopy={handleCopy} />
       </main>
       <nav className={`dock ${docked ? 'dock--show' : ''}`}>
-        <a href="#hikaye">Hikâye</a>
         <a href="#tarih">Tarih</a>
         <a href="#konum">Konum</a>
+        <a href="#anilar">Anılar</a>
         <a href="#altin" className="dock__gold">Altın</a>
       </nav>
       <div className={`toast ${toast ? 'toast--show' : ''}`} role="status">{toast}</div>
