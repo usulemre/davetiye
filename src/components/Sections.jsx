@@ -2,6 +2,7 @@ import { useSite } from '../site'
 import { formatDate, googleCalendarUrl, downloadICS } from '../date'
 import { useCountdown } from '../hooks'
 import Section from './Section'
+import { SplitText, Particles } from '../fx'
 
 const calendarEvent = (config) => ({
   title: `${config.groom.first} & ${config.bride.first} · ${config.eventType}`,
@@ -17,8 +18,12 @@ export function Invite() {
     <Section id="davet" className="invite">
       <p className="kicker">Sevgili misafirimiz</p>
       <p className="invite__text">
-        {config.inviteText}
+        <SplitText text={config.inviteText} by="word" />
       </p>
+      <svg className="ornament" viewBox="0 0 240 24" aria-hidden="true">
+        <path d="M0 12h96M144 12h96" />
+        <path d="M120 3c-4-5-12-2-12 4 0 6 12 12 12 14 0-2 12-8 12-14 0-6-8-9-12-4Z" />
+      </svg>
       <div className="invite__families">
         <div>
           <span className="invite__name">{config.groom.first} {config.groom.last}</span>
@@ -42,7 +47,11 @@ export function When() {
     <Section id="tarih" className="when">
       <p className="kicker">Kaydedin</p>
       <div className="bigdate">
-        <span>{d.day}</span><i>/</i><span>{d.month}</span><i>/</i><span>{d.year.slice(2)}</span>
+        {[d.day, '/', d.month, '/', d.year.slice(2)].map((p, i) => (
+          <span key={i} className="bigdate__part" style={{ '--i': i }}>
+            {p === '/' ? <i>/</i> : <b>{p}</b>}
+          </span>
+        ))}
       </div>
       <p className="when__line">{d.weekday} · Saat {d.time}</p>
 
@@ -52,7 +61,7 @@ export function When() {
         <div className="countdown">
           {units.map(([label, value]) => (
             <div key={label}>
-              <span className="countdown__num">{String(value).padStart(2, '0')}</span>
+              <span className="countdown__num"><b key={value}>{String(value).padStart(2, '0')}</b></span>
               <span className="countdown__label">{label}</span>
             </div>
           ))}
@@ -78,8 +87,8 @@ export function Program() {
       <p className="kicker">Akış</p>
       <h2 className="heading">Günün <em>programı</em></h2>
       <ol className="schedule">
-        {config.program.map((item) => (
-          <li key={item.time}>
+        {config.program.map((item, i) => (
+          <li key={item.time} style={{ '--i': i }}>
             <span className="schedule__time">{item.time}</span>
             <div>
               <h3>{item.title}</h3>
@@ -97,6 +106,9 @@ export function Venue({ onCopy }) {
   const q = encodeURIComponent(config.venue.mapsQuery)
   return (
     <Section id="konum" className="venue">
+      <span className="pin" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" /><circle cx="12" cy="10" r="2.6" /></svg>
+      </span>
       <p className="kicker">Mekân</p>
       <h2 className="heading">{config.venue.name}</h2>
       <p className="venue__address">{config.venue.address}</p>
@@ -137,6 +149,7 @@ export function Outro({ onCopy, onAdmin, isAdmin }) {
     <footer id="son" className="outro">
       <img className="outro__bg" src={config.outroPhoto} alt="" loading="lazy" />
       <div className="outro__shade" />
+      <Particles kind="heart" count={14} />
       <div className="outro__content">
         <p className="outro__text">Gelmeniz bizim için<br /><em>en büyük hediye.</em></p>
         <p className="outro__small">(Ama altın da fena olmaz 😇)</p>

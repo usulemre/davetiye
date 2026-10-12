@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSite } from '../site'
 import Section from './Section'
+import { Particles, useTilt } from '../fx'
 
 const OPTIONS = [
   { key: 'gram', label: 'Gram', msg: 'Gram da altındır, ayıp değil! Biz seni zaten çok seviyoruz 🥹' },
@@ -14,11 +15,13 @@ const OPTIONS = [
 export default function Gold({ onCopy }) {
   const config = useSite()
   const [pick, setPick] = useState(null)
+  const tilt = useTilt(14)
   const current = OPTIONS.find((o) => o.key === pick)
   const rawIban = config.gift.iban.replace(/\s/g, '')
 
   return (
     <Section id="altin" className="gold">
+      <Particles kind="coin" count={12} />
       <p className="kicker kicker--gold">Takı Merasimi · Dijital Şube</p>
       <h2 className="heading heading--light">Altın <em>köşesi</em></h2>
       <p className="gold__text">
@@ -41,6 +44,7 @@ export default function Gold({ onCopy }) {
         </p>
       </div>
 
+      <div className="card-wrap" ref={tilt}>
       <div className="card">
         <div className="card__top">
           <span className="card__chip" />
@@ -55,6 +59,7 @@ export default function Gold({ onCopy }) {
           </div>
           <span className="card__logo">{config.initials[0]}&amp;{config.initials[1]}</span>
         </div>
+      </div>
       </div>
 
       <button className="btn btn--gold" type="button"

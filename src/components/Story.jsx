@@ -32,7 +32,7 @@ export default function Story() {
 
       <div className="story__track" ref={track} onScroll={onScroll}>
         {config.story.map((s, i) => (
-          <article key={i} className="chapter">
+          <article key={i} className={`chapter ${i === active ? 'is-active' : ''}`}>
             <img src={s.photo} alt={s.title} loading="lazy" style={{ objectPosition: s.pos }} />
             <div className="chapter__shade" />
             <div className="chapter__body">
@@ -42,7 +42,7 @@ export default function Story() {
             </div>
           </article>
         ))}
-        <article className="chapter chapter--next">
+        <article className={`chapter chapter--next ${active === total - 1 ? 'is-active' : ''}`}>
           <div className="chapter__body">
             <span className="chapter__no">{String(total).padStart(2, '0')}</span>
             <h3>{config.eventType}</h3>

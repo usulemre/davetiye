@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { copyText } from './hooks'
 import { SiteContext, mergeSite, applyTheme } from './site'
+import { useScrollFx } from './fx'
 import { getAdminKey, verifyAdmin, logout as endSession, isLoginPath } from './admin'
 import Intro from './components/Intro'
 import Music from './components/Music'
@@ -27,6 +28,8 @@ export default function App() {
   const [docked, setDocked] = useState(false)
   const timer = useRef()
   const music = useRef(null)
+  const bar = useRef(null)
+  useScrollFx(bar)
 
   // Kaydedilmiş site ayarlarını yükle
   useEffect(() => {
@@ -111,6 +114,7 @@ export default function App() {
   return (
     <SiteContext.Provider value={site}>
       <Intro onOpen={(fromTap) => { setOpened(true); if (fromTap) music.current?.play() }} />
+      <div className="progress" ref={bar} aria-hidden="true" />
       <Music key={site.music} ref={music} />
       <main className={`page ${opened ? 'page--opened' : ''}`}>
         <Hero />

@@ -1,5 +1,6 @@
 import { useSite } from '../site'
 import { formatDate } from '../date'
+import { SplitText, Particles } from '../fx'
 
 export default function Hero() {
   const config = useSite()
@@ -10,6 +11,7 @@ export default function Hero() {
         <img src={config.heroPhoto} alt={`${config.groom.first} ve ${config.bride.first}`} />
       </div>
       <div className="hero__shade" />
+      <Particles kind="dust" count={22} />
       <div className="hero__top">
         <span>{config.initials[0]}&amp;{config.initials[1]}</span>
         <span>{d.day}.{d.month}.{d.year}</span>
@@ -17,9 +19,9 @@ export default function Hero() {
       <div className="hero__content">
         <p className="kicker kicker--light">{config.eventType} Davetiyesi</p>
         <h1 className="hero__names">
-          <span>{config.groom.first}<small>{config.groom.last}</small></span>
+          <span><SplitText text={config.groom.first} /><small>{config.groom.last}</small></span>
           <em>&amp;</em>
-          <span>{config.bride.first}<small>{config.bride.last}</small></span>
+          <span><SplitText text={config.bride.first} start={config.groom.first.length + 3} /><small>{config.bride.last}</small></span>
         </h1>
         <p className="hero__meta">
           <span>{d.day} {d.monthName} {d.year}</span>
