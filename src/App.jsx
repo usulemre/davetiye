@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { copyText } from './hooks'
 import Intro from './components/Intro'
+import Music from './components/Music'
 import Hero from './components/Hero'
 import Story from './components/Story'
 import Gold from './components/Gold'
@@ -11,6 +12,7 @@ export default function App() {
   const [toast, setToast] = useState(null)
   const [docked, setDocked] = useState(false)
   const timer = useRef()
+  const music = useRef(null)
 
   useEffect(() => {
     const onScroll = () => setDocked(window.scrollY > window.innerHeight * 0.6)
@@ -28,7 +30,8 @@ export default function App() {
 
   return (
     <>
-      <Intro onOpen={() => setOpened(true)} />
+      <Intro onOpen={(fromTap) => { setOpened(true); if (fromTap) music.current?.play() }} />
+      <Music ref={music} />
       <main className={`page ${opened ? 'page--opened' : ''}`}>
         <Hero />
         <Invite />

@@ -16,6 +16,9 @@ export const config = {
     mapsQuery: 'Beytepe Garden, Çankaya, Ankara',
   },
 
+  // Arka plan müziği: public/ klasöründeki ses dosyası
+  music: '/muzik.m4a',
+
   heroPhoto: '/soz.jpg',
   outroPhoto: '/yuzuk.jpg',
 

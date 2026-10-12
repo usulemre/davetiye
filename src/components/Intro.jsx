@@ -19,7 +19,7 @@ export default function Intro({ onOpen }) {
   const open = () => {
     if (state !== 'idle') return
     setState('opening')
-    onOpen()
+    onOpen(true)
     setTimeout(() => setState('gone'), 1400)
   }
 
