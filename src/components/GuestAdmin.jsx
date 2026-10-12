@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { guestsApi, guestLink, parseGuestLines, statusOf } from '../guests'
 import { copyText } from '../hooks'
 import { formatDate } from '../date'
 import Qr from './Qr'
+
+const Hall3D = lazy(() => import('./Hall3D'))
 
 const SIDES = [['', 'Ortak'], ['damat', 'Damat tarafı'], ['gelin', 'Gelin tarafı']]
 const STATUS = { yes: 'Geliyor', no: 'Gelmiyor', wait: 'Cevap yok' }
@@ -328,7 +330,7 @@ export function Tables({ store, notify }) {
   const { guests } = store
   const [sel, setSel] = useState(null)
   const [extra, setExtra] = useState([])
-  const [flat, setFlat] = useState(false)
+  const [real, setReal] = useState(true)
   const [busy, setBusy] = useState(false)
   if (!guests) return <p className="ahint">Yükleniyor…</p>
 
@@ -374,12 +376,27 @@ export function Tables({ store, notify }) {
           </button>
         )}
         <div className="tview" role="group" aria-label="Görünüm">
-          <button type="button" className={flat ? '' : 'is-on'} onClick={() => setFlat(false)}>3D</button>
-          <button type="button" className={flat ? 'is-on' : ''} onClick={() => setFlat(true)}>Düz</button>
+          <button type="button" className={real ? 'is-on' : ''} onClick={() => setReal(true)}>3D</button>
+          <button type="button" className={real ? '' : 'is-on'} onClick={() => setReal(false)}>Plan</button>
         </div>
       </div>
 
-      <div className={`tplan ${flat ? '' : 'tplan--3d'}`}>
+      {real ? (
+        <div className="hallwrap">
+          <Suspense fallback={<div className="hall hall--loading">3D salon hazırlanıyor…</div>}>
+            <Hall3D selected={sel} onSelect={setSel} tables={names.map((t) => ({
+              name: t,
+              people: total(groups[t] || []),
+              seats: (groups[t] || []).flatMap((g, gi) => Array.from({ length: headcount(g) }, (_, k) => ({
+                color: PALETTE[gi % PALETTE.length], initial: k === 0 ? initial(g.name) : '',
+              }))),
+            }))} />
+          </Suspense>
+          <p className="hall__hint">Parmağınla çevir, iki parmakla yakınlaştır, masaya dokunarak seç</p>
+          <button type="button" className="hall__new" onClick={addTable}>+ Yeni masa</button>
+        </div>
+      ) : (
+      <div className="tplan">
         <div className="tplan__stage">Sahne · Dans pisti</div>
         <div className="tplan__floor">
           {names.map((t) => (
@@ -398,6 +415,7 @@ export function Tables({ store, notify }) {
           </button>
         </div>
       </div>
+      )}
 
       {sel && (
         <section className="tdetail" key={sel}>
