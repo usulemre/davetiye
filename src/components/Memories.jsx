@@ -1,17 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Section from './Section'
+import { useSite } from '../site'
+import { shrink, uploadBlob } from '../images'
 
-const HASHTAG = '#MuhammedİsmetVeTuğçe'
 const NAME_KEY = 'davetiye:name'
 const LIKES_KEY = 'davetiye:likes'
-const ADMIN_KEY = 'davetiye:admin'
-
-function getAdminKey() {
-  const fromUrl = new URLSearchParams(window.location.search).get('admin')
-  if (fromUrl) localStorage.setItem(ADMIN_KEY, fromUrl)
-  return localStorage.getItem(ADMIN_KEY)
-}
-
 const rtf = new Intl.RelativeTimeFormat('tr', { numeric: 'auto' })
 function timeAgo(ts) {
   const s = Math.round((ts - Date.now()) / 1000)
@@ -20,52 +13,6 @@ function timeAgo(ts) {
   let unit = 'minute', div = 60
   for (const [d, u] of steps) if (-s >= d) { unit = u; div = d }
   return rtf.format(Math.round(s / div), unit)
-}
-
-// Fotoğrafı tarayıcının açabileceği bir görsele çevir
-async function decode(file) {
-  if ('createImageBitmap' in window) {
-    try {
-      return await createImageBitmap(file, { imageOrientation: 'from-image' })
-    } catch {
-      // eski Safari seçenekleri desteklemiyor ya da format açılamadı, <img> ile dene
-    }
-  }
-  const url = URL.createObjectURL(file)
-  try {
-    const img = new Image()
-    img.src = url
-    await img.decode()
-    return img
-  } finally {
-    URL.revokeObjectURL(url)
-  }
-}
-
-// Fotoğrafı yüklemeden önce küçült (hızlı yükleme + az depolama)
-async function shrink(file, max = 1600) {
-  let source
-  try {
-    source = await decode(file)
-  } catch {
-    // Tarayıcı açamadı (ör. HEIC). JPEG/PNG/WebP ise olduğu gibi yükle
-    if (/^image\/(jpeg|png|webp)$/.test(file.type)) return { blob: file, width: 0, height: 0 }
-    const err = new Error('Bu fotoğraf formatı desteklenmiyor. Ekran görüntüsü alıp onu yüklemeyi deneyin 🙏')
-    err.step = 'decode'
-    throw err
-  }
-  const sw = source.width || source.naturalWidth
-  const sh = source.height || source.naturalHeight
-  const scale = Math.min(1, max / Math.max(sw, sh))
-  const w = Math.round(sw * scale)
-  const h = Math.round(sh * scale)
-  const canvas = document.createElement('canvas')
-  canvas.width = w
-  canvas.height = h
-  canvas.getContext('2d').drawImage(source, 0, 0, w, h)
-  const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.84))
-  if (!blob) return { blob: file, width: sw, height: sh }
-  return { blob, width: w, height: h }
 }
 
 function report(step, err, file) {
@@ -86,12 +33,12 @@ async function api(path, options = {}) {
   return data
 }
 
-export default function Memories({ notify }) {
+export default function Memories({ notify, admin }) {
+  const config = useSite()
   const [posts, setPosts] = useState(null)
   const [error, setError] = useState(null)
   const [name, setName] = useState(() => localStorage.getItem(NAME_KEY) || '')
   const [liked, setLiked] = useState(() => new Set(JSON.parse(localStorage.getItem(LIKES_KEY) || '[]')))
-  const [admin] = useState(getAdminKey)
   // Yerel bir değişiklik (beğeni, yorum…) olduysa, ondan önce başlamış yenilemeyi yok say
   const version = useRef(0)
   const mutate = (fn) => {
@@ -170,7 +117,7 @@ export default function Memories({ notify }) {
         Çektiğiniz kareleri buraya bırakın, birbirinizinkini beğenin, altına yorum yazın.
         Gelinle damadın en sevdiği anıları buradan seçeceğiz 📸
       </p>
-      <span className="memories__tag">{HASHTAG}</span>
+      <span className="memories__tag">{config.hashtag}</span>
 
       <Composer name={name} onName={saveName} notify={notify}
         onPosted={(p) => mutate((ps) => [p, ...(ps || [])])} />
@@ -235,16 +182,9 @@ function Composer({ name, onName, onPosted, notify }) {
     }
     setBusy(true)
     try {
-      const [{ blob, width, height }, { upload }] = await Promise.all([shrink(file), import('@vercel/blob/client')])
-      const type = blob.type || 'image/jpeg'
-      const ext = type.split('/')[1] === 'jpeg' ? 'jpg' : type.split('/')[1]
-      const uploaded = await upload(`anilar/${Date.now()}.${ext}`, blob, {
-        access: 'public',
-        handleUploadUrl: '/api/upload',
-        contentType: type,
-        onUploadProgress: ({ percentage }) => setProgress(percentage),
-      })
-      const body = { url: uploaded.url, name, caption, width, height }
+      const { blob, width, height } = await shrink(file)
+      const url = await uploadBlob('anilar', blob, { onProgress: setProgress })
+      const body = { url, name, caption, width, height }
       const { id } = await api('/api/posts', { method: 'POST', body: JSON.stringify(body) })
       onPosted({ ...body, id, likes: 0, comments: [], createdAt: Date.now() })
       notify('Paylaşıldı! 🎉')

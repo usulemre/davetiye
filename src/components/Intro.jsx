@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { config } from '../config'
+import { useSite } from '../site'
 
 export default function Intro({ onOpen }) {
+  const config = useSite()
   const [state, setState] = useState(() => (window.location.hash ? 'gone' : 'idle'))
 
   useEffect(() => {

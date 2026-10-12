@@ -1,10 +1,16 @@
-// Davetiyedeki tüm bilgiler burada. Değiştirmek için sadece bu dosyayı düzenleyin.
-export const config = {
+// Davetiyenin varsayılan bilgileri. Yönetici panelinden yapılan değişiklikler bunların üzerine yazılır.
+export const defaults = {
   groom: { first: 'Muhammed İsmet', last: 'Sekmen' },
   bride: { first: 'Tuğçe', last: 'Üspolat' },
-  initials: ['M', 'T'],
-
   eventType: 'Düğün',
+
+  inviteText: 'Bir akvaryumun önünde başlayan hikâyemiz, şimdi en güzel bölümüne geliyor. Hayatımızı birleştirdiğimiz bu özel günde sizi de yanımızda görmek en büyük mutluluğumuz olacak.',
+  hashtag: '#MuhammedİsmetVeTuğçe',
+
+  theme: 'siyah',
+
+  // Bölümleri gizlemek/göstermek için
+  sections: { story: true, program: true, gold: true, memories: true },
 
   // ⚠️ TARİHİ GÜNCELLEYİN — yerel saat (Türkiye, +03:00)
   start: '2026-11-21T19:00:00+03:00',

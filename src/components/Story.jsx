@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
-import { config } from '../config'
+import { useSite } from '../site'
 import Section from './Section'
 
 export default function Story() {
+  const config = useSite()
   const track = useRef(null)
   const [active, setActive] = useState(0)
   const total = config.story.length + 1
@@ -30,12 +31,12 @@ export default function Story() {
       </div>
 
       <div className="story__track" ref={track} onScroll={onScroll}>
-        {config.story.map((s) => (
-          <article key={s.no} className="chapter">
+        {config.story.map((s, i) => (
+          <article key={i} className="chapter">
             <img src={s.photo} alt={s.title} loading="lazy" style={{ objectPosition: s.pos }} />
             <div className="chapter__shade" />
             <div className="chapter__body">
-              <span className="chapter__no">{s.no}</span>
+              <span className="chapter__no">{String(i + 1).padStart(2, '0')}</span>
               <h3>{s.title}</h3>
               <p>{s.text}</p>
             </div>
@@ -43,8 +44,8 @@ export default function Story() {
         ))}
         <article className="chapter chapter--next">
           <div className="chapter__body">
-            <span className="chapter__no">0{total}</span>
-            <h3>Düğün</h3>
+            <span className="chapter__no">{String(total).padStart(2, '0')}</span>
+            <h3>{config.eventType}</h3>
             <p>Hikâyenin en güzel bölümü. Bu sefer kadroda <strong>sen de varsın.</strong></p>
             <a href="#tarih" className="chapter__cta">Tarihi gör →</a>
           </div>

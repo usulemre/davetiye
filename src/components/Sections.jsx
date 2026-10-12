@@ -1,24 +1,23 @@
-import { config } from '../config'
+import { useSite } from '../site'
 import { formatDate, googleCalendarUrl, downloadICS } from '../date'
 import { useCountdown } from '../hooks'
 import Section from './Section'
 
-const event = {
+const calendarEvent = (config) => ({
   title: `${config.groom.first} & ${config.bride.first} · ${config.eventType}`,
   start: config.start,
   end: config.end,
   location: `${config.venue.name}, ${config.venue.address}`,
   details: 'Sizi de aramızda görmek istiyoruz 🤍',
-}
+})
 
 export function Invite() {
+  const config = useSite()
   return (
     <Section id="davet" className="invite">
       <p className="kicker">Sevgili misafirimiz</p>
       <p className="invite__text">
-        Bir akvaryumun önünde başlayan hikâyemiz, şimdi en güzel bölümüne geliyor.
-        Hayatımızı birleştirdiğimiz bu özel günde <em>sizi de yanımızda</em> görmek
-        en büyük mutluluğumuz olacak.
+        {config.inviteText}
       </p>
       <div className="invite__families">
         <div>
@@ -34,6 +33,8 @@ export function Invite() {
 }
 
 export function When() {
+  const config = useSite()
+  const event = calendarEvent(config)
   const d = formatDate(config.start)
   const c = useCountdown(config.start)
   const units = [['Gün', c.days], ['Saat', c.hours], ['Dakika', c.minutes], ['Saniye', c.seconds]]
@@ -71,6 +72,7 @@ export function When() {
 }
 
 export function Program() {
+  const config = useSite()
   return (
     <Section id="program" className="program">
       <p className="kicker">Akış</p>
@@ -91,6 +93,7 @@ export function Program() {
 }
 
 export function Venue({ onCopy }) {
+  const config = useSite()
   const q = encodeURIComponent(config.venue.mapsQuery)
   return (
     <Section id="konum" className="venue">
@@ -114,6 +117,7 @@ export function Venue({ onCopy }) {
 }
 
 export function Outro({ onCopy }) {
+  const config = useSite()
   const url = window.location.origin
   const message = `${config.groom.first} & ${config.bride.first} evleniyor! 💍 Düğün davetiyemiz:`
 

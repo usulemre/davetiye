@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { config } from '../config'
+import { useSite } from '../site'
 import Section from './Section'
 
 const OPTIONS = [
@@ -12,6 +12,7 @@ const OPTIONS = [
 ]
 
 export default function Gold({ onCopy }) {
+  const config = useSite()
   const [pick, setPick] = useState(null)
   const current = OPTIONS.find((o) => o.key === pick)
   const rawIban = config.gift.iban.replace(/\s/g, '')

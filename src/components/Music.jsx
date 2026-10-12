@@ -1,7 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { config } from '../config'
+import { useSite } from '../site'
 
 const Music = forwardRef(function Music(_, ref) {
+  const config = useSite()
   const audio = useRef(null)
   const [playing, setPlaying] = useState(false)
   const [available, setAvailable] = useState(true)
@@ -48,6 +49,7 @@ const Music = forwardRef(function Music(_, ref) {
   }
 
   if (!config.music || !available) return null
+
 
   return (
     <>

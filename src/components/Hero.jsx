@@ -1,7 +1,8 @@
-import { config } from '../config'
+import { useSite } from '../site'
 import { formatDate } from '../date'
 
 export default function Hero() {
+  const config = useSite()
   const d = formatDate(config.start)
   return (
     <header className="hero">
