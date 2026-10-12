@@ -99,7 +99,8 @@ a { color: inherit; }
   font-family: var(--serif); font-weight: 300; font-size: clamp(26px, 7vw, 36px); line-height: 1.15;
   opacity: 0; animation: fadeUp 1.2s var(--ease) .9s forwards;
 }
-.intro__names em { font-style: italic; color: var(--champagne-hi); }
+.intro__names { display: flex; flex-direction: column; align-items: center; }
+.intro__names em { font-style: italic; color: var(--champagne-hi); font-size: .7em; margin: 4px 0; }
 .intro__hint {
   margin: 0; font-size: 10px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase;
   color: rgba(230, 209, 171, .55);
@@ -164,9 +165,9 @@ a { color: inherit; }
 }
 .env__card-names {
   margin: 0; display: flex; flex-direction: column; align-items: center;
-  font-family: var(--serif); font-weight: 300; font-size: clamp(20px, 5.6vw, 26px); line-height: 1.05;
+  font-family: var(--serif); font-weight: 300; font-size: clamp(18px, 5vw, 23px); line-height: 1.05;
 }
-.env__card-names em { font-style: italic; color: var(--champagne); font-size: .8em; }
+.env__card-names em { font-style: italic; color: var(--champagne); font-size: .7em; margin: 2px 0; }
 .env__card-date { font-family: var(--serif); font-size: 13px; letter-spacing: .12em; color: var(--stone); }
 
 .env__seal {
@@ -233,6 +234,11 @@ a { color: inherit; }
   font-size: clamp(46px, 13vw, 96px); line-height: .92; letter-spacing: -.02em;
 }
 .hero__names span { display: block; }
+.hero__names small {
+  display: block; margin-top: 8px;
+  font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .4em; text-indent: .4em;
+  text-transform: uppercase; color: rgba(255, 255, 255, .8);
+}
 .hero__names em { display: block; font-size: .55em; font-style: italic; color: var(--champagne-hi); margin: 6px 0 2px; }
 .hero__meta {
   display: flex; justify-content: center; align-items: center; gap: 12px;

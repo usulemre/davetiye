@@ -41,7 +41,9 @@ export default function Intro({ onOpen }) {
         <div className="env__card">
           <span className="env__card-kicker">{config.eventType}</span>
           <p className="env__card-names">
-            {config.groom.first}<em>&amp;</em>{config.bride.first}
+            <span>{config.groom.first} {config.groom.last}</span>
+            <em>&amp;</em>
+            <span>{config.bride.first} {config.bride.last}</span>
           </p>
           <span className="env__card-date">{d.day} · {d.month} · {d.year}</span>
         </div>
@@ -53,7 +55,9 @@ export default function Intro({ onOpen }) {
       </div>
 
       <p className="intro__names">
-        {config.groom.first} <em>&amp;</em> {config.bride.first}
+        <span>{config.groom.first} {config.groom.last}</span>
+        <em>&amp;</em>
+        <span>{config.bride.first} {config.bride.last}</span>
       </p>
       <p className="intro__hint">Mührü kırmak için dokunun</p>
     </div>

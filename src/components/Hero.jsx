@@ -17,9 +17,9 @@ export default function Hero() {
       <div className="hero__content">
         <p className="kicker kicker--light">{config.eventType} Davetiyesi</p>
         <h1 className="hero__names">
-          <span>{config.groom.first}</span>
+          <span>{config.groom.first}<small>{config.groom.last}</small></span>
           <em>&amp;</em>
-          <span>{config.bride.first}</span>
+          <span>{config.bride.first}<small>{config.bride.last}</small></span>
         </h1>
         <p className="hero__meta">
           <span>{d.day} {d.monthName} {d.year}</span>
