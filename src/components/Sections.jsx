@@ -17,6 +17,7 @@ export function Invite() {
   return (
     <Section id="davet" className="invite">
       <p className="kicker">Sevgili misafirimiz</p>
+      <span className="invite__quote" aria-hidden="true">“</span>
       <p className="invite__text">
         <SplitText text={config.inviteText} by="word" />
       </p>
@@ -45,7 +46,8 @@ export function When() {
   const units = [['Gün', c.days], ['Saat', c.hours], ['Dakika', c.minutes], ['Saniye', c.seconds]]
   return (
     <Section id="tarih" className="when">
-      <p className="kicker">Kaydedin</p>
+      <div className="aurora" aria-hidden="true"><i /><i /><i /></div>
+      <p className="kicker kicker--gold">Kaydedin</p>
       <div className="bigdate">
         {[d.day, '/', d.month, '/', d.year.slice(2)].map((p, i) => (
           <span key={i} className="bigdate__part" style={{ '--i': i }}>
@@ -113,6 +115,7 @@ export function Venue({ onCopy }) {
       <h2 className="heading">{config.venue.name}</h2>
       <p className="venue__address">{config.venue.address}</p>
       <div className="map">
+        <span className="map__chip"><b /> {config.venue.name}</span>
         <iframe title="Konum" src={`https://maps.google.com/maps?q=${q}&z=15&output=embed`}
           loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
       </div>

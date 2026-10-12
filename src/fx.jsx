@@ -99,3 +99,30 @@ export function useTilt(max = 10) {
   }, [max])
   return ref
 }
+
+// Sonsuz kayan yazı şeridi
+export function Marquee({ items, dark = false }) {
+  const row = items.flatMap((t, i) => [<span key={`t${i}`}>{t}</span>, <i key={`s${i}`}>✦</i>])
+  return (
+    <div className={`marquee ${dark ? 'marquee--dark' : ''}`} aria-hidden="true">
+      <div className="marquee__track">
+        <div>{row}</div>
+        <div>{row}</div>
+      </div>
+    </div>
+  )
+}
+
+// Dairesel dönen yazı rozeti
+export function SpinBadge({ text, href, center }) {
+  const id = 'badge-path'
+  return (
+    <a className="badge" href={href} aria-label={text}>
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <defs><path id={id} d="M50 50m-38 0a38 38 0 1 1 76 0a38 38 0 1 1 -76 0" /></defs>
+        <text><textPath href={`#${id}`} textLength="236">{text}</textPath></text>
+      </svg>
+      <span>{center}</span>
+    </a>
+  )
+}
