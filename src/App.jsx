@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { copyText } from './hooks'
 import { SiteContext, mergeSite, applyTheme } from './site'
-import { useScrollFx, Marquee } from './fx'
+import { useScrollFx } from './fx'
 import { getAdminKey, verifyAdmin, logout as endSession, isLoginPath } from './admin'
 import Intro from './components/Intro'
 import Music from './components/Music'
@@ -118,15 +118,15 @@ export default function App() {
       <Music key={site.music} ref={music} />
       <main className={`page ${opened ? 'page--opened' : ''}`}>
         <Hero />
-        <Marquee dark items={[`${site.groom.first} ${site.groom.last}`, `${site.bride.first} ${site.bride.last}`, site.venue.name, site.eventType]} />
         <Invite />
         {show.story !== false && site.story?.length > 0 && <Story />}
-        <When />
-        {show.program !== false && <Program />}
-        <Venue onCopy={handleCopy} />
+        <div className="bento">
+          <When />
+          {show.program !== false && <Program />}
+          <Venue onCopy={handleCopy} />
+        </div>
         {show.gold !== false && <Gold onCopy={handleCopy} />}
         {show.memories !== false && <Memories notify={notify} admin={admin} />}
-        <Marquee items={['Sizi bekliyoruz', site.hashtag, 'Mutluluğumuza ortak olun', site.venue.name]} />
         <Outro onCopy={handleCopy} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>
       <nav className={`dock ${docked && !editing ? 'dock--show' : ''}`}>

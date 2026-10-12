@@ -1032,38 +1032,6 @@ body::after {
 .btn--solid:hover::before { transform: translateX(4px); }
 .btn--gold { border-radius: 999px; box-shadow: 0 18px 40px -18px rgba(230, 209, 171, .7); }
 
-/* kayan isim şeridi */
-.marquee { overflow: hidden; padding: 20px 0; background: var(--paper); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.marquee--dark { background: var(--ink); color: var(--ivory); border: 0; }
-.marquee__track { display: flex; width: max-content; animation: marquee 32s linear infinite; }
-.marquee__track > div { display: flex; align-items: center; flex: none; }
-.marquee span {
-  padding: 0 22px; white-space: nowrap;
-  font-family: var(--serif); font-weight: 300; font-size: clamp(30px, 8vw, 54px); line-height: 1; letter-spacing: -.01em;
-}
-.marquee span:nth-of-type(even) { font-style: italic; color: transparent; -webkit-text-stroke: 1px var(--champagne); }
-.marquee i { font-style: normal; font-size: 14px; color: var(--champagne); }
-@keyframes marquee { to { transform: translateX(-50%); } }
-
-/* kapakta dönen rozet */
-.badge {
-  position: absolute; z-index: 3; right: 14px; top: calc(108px + env(safe-area-inset-top));
-  width: 84px; height: 84px; display: grid; place-items: center;
-  color: #fff; text-decoration: none;
-  opacity: 0;
-}
-.page--opened .badge { animation: fadeUp 1s var(--ease) 2s forwards; }
-.badge svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; animation: spin 16s linear infinite; }
-.badge text { fill: rgba(255, 255, 255, .85); font-family: var(--sans); font-size: 8.4px; font-weight: 600; letter-spacing: .12em; }
-.badge span {
-  display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(255, 255, 255, .1); border: 1px solid rgba(230, 209, 171, .5);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  color: var(--champagne-hi); font-size: 15px;
-  animation: beat 1.8s ease-in-out infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
 /* davet: büyük tırnak */
 .invite__quote {
   display: block; height: 60px; margin: -10px 0 4px;
@@ -1145,5 +1113,110 @@ body::after {
 .outro__text { font-size: clamp(38px, 10vw, 60px); }
 
 @media (prefers-reduced-motion: reduce) {
-  body::after, .marquee__track, .badge svg, .aurora i { animation: none; }
+  body::after, .aurora i { animation: none; }
 }
+
+/* =========================================================
+   SİNEMATİK KOYU TASARIM
+   Tema renkleri korunur: koyu renk zemin, açık renk yazı olur.
+   ========================================================= */
+:root {
+  --d-bg: var(--ink);
+  --d-fg: var(--paper);
+  --d-iv: var(--ivory);
+}
+body { background: var(--d-bg); }
+body::after { mix-blend-mode: overlay; opacity: .09; }
+
+.page {
+  --ink: var(--d-fg);
+  --paper: var(--d-bg);
+  --ivory: color-mix(in srgb, var(--d-fg) 4%, var(--d-bg));
+  --stone: color-mix(in srgb, var(--d-fg) 58%, transparent);
+  --line: color-mix(in srgb, var(--d-fg) 11%, transparent);
+  --surface: color-mix(in srgb, var(--d-fg) 5%, transparent);
+  --surface-hi: color-mix(in srgb, var(--d-fg) 9%, transparent);
+  position: relative; isolation: isolate;
+  background: var(--d-bg); color: var(--d-fg);
+}
+/* sabit, yumuşak altın ışıklar */
+.page::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(50% 35% at 85% 10%, color-mix(in srgb, var(--champagne) 16%, transparent), transparent 70%),
+    radial-gradient(45% 35% at 5% 75%, color-mix(in srgb, var(--champagne) 12%, transparent), transparent 70%);
+}
+/* koyu kalması gereken bölümler orijinal renkleri kullanır */
+.hero, .gold, .outro, .when { --ink: var(--d-bg); --paper: var(--d-fg); --ivory: var(--d-iv); --line: rgba(255, 255, 255, .12); --stone: rgba(255, 255, 255, .6); }
+
+/* kapak fotoğrafı sayfaya yumuşakça erir */
+.hero__shade {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,0) 22%),
+    linear-gradient(0deg, var(--d-bg) 0%, color-mix(in srgb, var(--d-bg) 70%, transparent) 30%, transparent 62%);
+}
+
+.section { padding-top: 120px; padding-bottom: 120px; }
+.heading { font-size: clamp(44px, 11vw, 76px); }
+
+/* davet */
+.invite__text { font-size: clamp(27px, 7vw, 40px); line-height: 1.3; }
+.invite__quote { opacity: .5; }
+
+/* hikâye */
+.story { background: transparent; }
+.chapter { box-shadow: 0 40px 70px -40px rgba(0, 0, 0, .9); border: 1px solid var(--line); }
+.chapter--next { background: radial-gradient(80% 60% at 70% 20%, color-mix(in srgb, var(--champagne) 30%, transparent), transparent 70%), var(--surface); }
+.story__dots button.is-active { background: var(--champagne-hi); }
+
+/* ---------- büyük gün: kutucuk (bento) düzeni ---------- */
+.bento {
+  display: grid; gap: 14px;
+  max-width: 1080px; margin: 0 auto; padding: 0 14px;
+}
+.bento > .section {
+  max-width: none; width: 100%; margin: 0;
+  padding: 60px 22px;
+  border-radius: 32px; overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--d-fg) 8%, transparent), 0 40px 80px -50px rgba(0, 0, 0, .8);
+}
+.bento > .section > * { max-width: 560px; margin-left: auto; margin-right: auto; }
+.bento > .when { padding: 70px 22px; background: color-mix(in srgb, var(--d-bg) 70%, #000); }
+.bento .heading { font-size: clamp(38px, 9vw, 54px); }
+@media (min-width: 900px) {
+  .bento { grid-template-columns: 1fr 1fr; }
+  .bento > .when { grid-column: 1 / -1; }
+}
+
+/* program kutusu */
+.schedule li { background: var(--surface); border: 1px solid var(--line) !important; }
+.schedule li:hover { background: var(--surface-hi); }
+.schedule li::before { background: var(--d-bg); }
+
+/* mekân kutusu */
+.map { border: 1px solid var(--line); }
+.venue .btn-row { flex-direction: row; }
+
+/* ---------- altın köşesi ---------- */
+.gold { margin: 14px 14px 0; border-radius: 32px; max-width: 1080px; }
+@media (min-width: 1108px) { .gold { margin: 14px auto 0; } }
+.gold { background: radial-gradient(90% 60% at 50% 0%, color-mix(in srgb, var(--champagne) 22%, transparent), transparent 70%), color-mix(in srgb, var(--d-bg) 70%, #000); border: 1px solid rgba(255, 255, 255, .1); }
+
+/* ---------- anı duvarı ---------- */
+.composer { background: var(--surface); border: 1px solid var(--line); box-shadow: none; }
+.composer__drop { background: transparent; border-color: color-mix(in srgb, var(--d-fg) 25%, transparent); color: var(--d-fg); }
+.composer__drop:hover { background: var(--surface-hi); }
+.field, .post__form input { background: var(--surface); color: var(--d-fg); border-color: var(--line); }
+.field::placeholder, .post__form input::placeholder { color: var(--stone); }
+.field:focus, .post__form input:focus { border-color: var(--champagne); }
+.composer__fields .field { background: var(--surface); }
+.post { background: var(--surface); border: 1px solid var(--line); box-shadow: 0 40px 70px -50px rgba(0, 0, 0, .9); }
+.post__avatar { background: color-mix(in srgb, var(--champagne) 25%, var(--d-bg)); color: var(--champagne-hi); }
+.post__actions button { color: var(--d-fg); }
+.memories__tag { background: var(--surface); }
+
+/* ---------- kapanış ---------- */
+.outro { margin-top: 120px; }
+.outro__shade { background: linear-gradient(180deg, var(--d-bg) 0%, color-mix(in srgb, var(--d-bg) 75%, transparent) 32%, transparent 62%); }

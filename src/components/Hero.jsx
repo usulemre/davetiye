@@ -1,6 +1,6 @@
 import { useSite } from '../site'
 import { formatDate } from '../date'
-import { SplitText, Particles, SpinBadge } from '../fx'
+import { SplitText, Particles } from '../fx'
 
 export default function Hero() {
   const config = useSite()
@@ -29,7 +29,6 @@ export default function Hero() {
           <span>{config.venue.name}</span>
         </p>
       </div>
-      <SpinBadge href="#tarih" text={`TARİHİ KAYDET ✦ ${d.day}.${d.month}.${d.year} ✦ `} center="♥" />
       <a href="#davet" className="hero__scroll" aria-label="Aşağı kaydır">
         <span>Kaydır</span><i />
       </a>
