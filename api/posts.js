@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
-      if (!isAdmin(req)) return res.status(403).json({ error: 'Yetkisiz' })
+      if (!(await isAdmin(req))) return res.status(403).json({ error: 'Yetkisiz' })
       const id = clean(req.query.id, 40)
       const post = await db().hgetall(`post:${id}`)
       if (post?.url) await del(post.url).catch(() => {})

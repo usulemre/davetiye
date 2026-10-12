@@ -396,7 +396,7 @@ a { color: inherit; }
 /* ---------- outro ---------- */
 .outro {
   position: relative; min-height: 92svh;
-  display: grid; place-items: start center;
+  display: grid; grid-template-rows: 1fr auto; justify-items: center;
   overflow: hidden; background: var(--ink); color: #fff; text-align: center;
 }
 .outro__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 100%; }
@@ -558,6 +558,39 @@ a { color: inherit; }
 }
 .admin-mini em { font-style: normal; color: var(--champagne-hi); }
 .admin-mini button { padding: 9px 14px; border: 0; border-radius: 10px; background: #fff; color: #161616; font-weight: 700; font-size: 12.5px; }
+
+/* ---------- login ---------- */
+.login {
+  position: fixed; inset: 0; z-index: 200;
+  display: grid; place-items: center; padding: 20px;
+  background: rgba(10,10,10,.55);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  animation: fadeIn .25s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } }
+.login__card {
+  position: relative; width: min(380px, 100%);
+  padding: 30px 24px 24px; border-radius: 22px;
+  background: #fff; color: #161616; text-align: left; font-family: var(--sans);
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.5);
+  animation: sheet .35s var(--ease);
+}
+.login__close { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: #f3f3f3; color: #161616; font-size: 20px; line-height: 1; }
+.login__icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 14px; border-radius: 14px; background: var(--ink); color: var(--champagne-hi); }
+.login__icon svg { width: 24px; height: 24px; }
+.login h2 { margin: 0 0 6px; font-family: var(--serif); font-weight: 400; font-size: 30px; }
+.login p { margin: 0 0 20px; font-size: 13.5px; line-height: 1.5; color: #777; }
+.login__pass { position: relative; }
+.login__pass input { padding-right: 76px; }
+.login__pass button { position: absolute; right: 6px; top: 50%; translate: 0 -50%; padding: 6px 10px; border: 0; border-radius: 8px; background: #eee; color: #333; font-size: 12px; font-weight: 600; }
+.login .login__error { margin: 4px 0 12px; padding: 10px 12px; border-radius: 10px; background: #fdecea; color: #b03a2e; font-size: 13px; }
+.login .abtn { margin-top: 6px; padding: 14px; font-size: 14px; }
+
+.outro__admin {
+  position: relative; z-index: 1; display: block; margin: 0 auto; padding: 10px 14px calc(96px + env(safe-area-inset-bottom));
+  border: 0; background: none; color: rgba(255,255,255,.4); font-size: 11px; letter-spacing: .08em;
+}
+.outro__admin:hover { color: rgba(255,255,255,.8); }
 
 /* ---------- toast ---------- */
 .toast {

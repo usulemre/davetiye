@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
 import { THEMES, themeColors } from '../site'
 import { shrink, uploadBlob } from '../images'
+import { changeCredentials } from '../admin'
 
 const TABS = [
   ['genel', 'Genel'], ['tema', 'Renkler'], ['foto', 'Fotoğraflar'], ['hikaye', 'Hikâye'],
-  ['program', 'Program'], ['mekan', 'Mekân'], ['altin', 'Altın / IBAN'], ['muzik', 'Müzik'], ['bolum', 'Bölümler'],
+  ['program', 'Program'], ['mekan', 'Mekân'], ['altin', 'Altın / IBAN'], ['muzik', 'Müzik'], ['bolum', 'Bölümler'], ['hesap', 'Hesap'],
 ]
 const EVENT_TYPES = ['Düğün', 'Nişan', 'Kına', 'Söz', 'Nikâh']
 const COLOR_FIELDS = [
@@ -208,6 +209,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             ))}
           </Group>
         )}
+        {tab === 'hesap' && <Account adminKey={adminKey} notify={notify} />}
       </div>
 
       <footer className="admin__foot">
@@ -220,6 +222,43 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
         </div>
       </footer>
     </aside>
+  )
+}
+
+function Account({ adminKey, notify }) {
+  const [username, setUsername] = useState('')
+  const [currentPassword, setCurrent] = useState('')
+  const [newPassword, setNew] = useState('')
+  const [again, setAgain] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const submit = async (e) => {
+    e.preventDefault()
+    if (newPassword !== again) return notify('Yeni şifreler aynı değil')
+    setBusy(true)
+    try {
+      await changeCredentials(adminKey, { username, currentPassword, newPassword })
+      notify('Giriş bilgileri güncellendi ✓')
+      setCurrent(''); setNew(''); setAgain('')
+    } catch (err) {
+      notify(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <form onSubmit={submit}>
+      <Group title="Giriş bilgilerini değiştir" hint="Yönetici girişinde kullanılan kullanıcı adı ve şifre. Herkes aynı hesabı kullanır.">
+        <Field label="Kullanıcı adı" value={username} onChange={setUsername} />
+        <Field label="Mevcut şifre" type="password" value={currentPassword} onChange={setCurrent} />
+        <Field label="Yeni şifre (en az 8 karakter)" type="password" value={newPassword} onChange={setNew} />
+        <Field label="Yeni şifre (tekrar)" type="password" value={again} onChange={setAgain} />
+        <button type="submit" className="abtn abtn--block" disabled={busy || !username || !currentPassword || newPassword.length < 8}>
+          {busy ? 'Kaydediliyor…' : 'Giriş bilgilerini kaydet'}
+        </button>
+      </Group>
+    </form>
   )
 }
 

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useSite } from '../site'
+import { isLoginPath } from '../admin'
 
 export default function Intro({ onOpen }) {
   const config = useSite()
-  const [state, setState] = useState(() => (window.location.hash ? 'gone' : 'idle'))
+  const [state, setState] = useState(() => (window.location.hash || isLoginPath() ? 'gone' : 'idle'))
 
   useEffect(() => {
     if (state === 'gone' && window.location.hash) {

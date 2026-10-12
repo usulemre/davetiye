@@ -23,9 +23,14 @@ export async function rateLimit(req, action, max, window) {
   return count <= max
 }
 
+// Yönetici oturumu: girişte verilen token Redis'te 30 gün saklanır
+export async function isAdminToken(token) {
+  if (typeof token !== 'string' || token.length < 32) return false
+  return Boolean(await db().get(`session:${token}`))
+}
+
 export function isAdmin(req) {
-  const key = req.headers['x-admin-key']
-  return Boolean(process.env.ADMIN_KEY) && key === process.env.ADMIN_KEY
+  return isAdminToken(req.headers['x-admin-key'])
 }
 
 export function clean(value, max) {

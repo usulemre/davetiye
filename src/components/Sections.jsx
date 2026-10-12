@@ -116,7 +116,7 @@ export function Venue({ onCopy }) {
   )
 }
 
-export function Outro({ onCopy }) {
+export function Outro({ onCopy, onAdmin, isAdmin }) {
   const config = useSite()
   const url = window.location.origin
   const message = `${config.groom.first} & ${config.bride.first} evleniyor! 💍 Düğün davetiyemiz:`
@@ -158,6 +158,9 @@ export function Outro({ onCopy }) {
           </div>
         </div>
       </div>
+      {!isAdmin && (
+        <button type="button" className="outro__admin" onClick={onAdmin}>Yönetici girişi</button>
+      )}
     </footer>
   )
 }

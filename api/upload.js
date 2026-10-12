@@ -1,13 +1,12 @@
 import { handleUpload } from '@vercel/blob/client'
-import { rateLimit } from './_lib.js'
+import { rateLimit, isAdminToken } from './_lib.js'
 
 const IMAGES = ['image/jpeg', 'image/png', 'image/webp']
 const AUDIO = ['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/m4a']
 
-function adminFromPayload(payload) {
+async function adminFromPayload(payload) {
   try {
-    const key = JSON.parse(payload || '{}').adminKey
-    return Boolean(process.env.ADMIN_KEY) && key === process.env.ADMIN_KEY
+    return await isAdminToken(JSON.parse(payload || '{}').adminKey)
   } catch {
     return false
   }
@@ -21,7 +20,7 @@ export default async function handler(req, res) {
       request: req,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
         // Yönetici: site fotoğrafları ve müzik yükleyebilir
-        if (adminFromPayload(clientPayload)) {
+        if (await adminFromPayload(clientPayload)) {
           return { allowedContentTypes: [...IMAGES, ...AUDIO], maximumSizeInBytes: 25 * 1024 * 1024, addRandomSuffix: true }
         }
         if (!(await rateLimit(req, 'upload', 30, 3600))) {

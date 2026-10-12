@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'DELETE') {
-      if (!isAdmin(req)) return res.status(403).json({ error: 'Yetkisiz' })
+      if (!(await isAdmin(req))) return res.status(403).json({ error: 'Yetkisiz' })
       const postId = clean(req.query.post, 40)
       const commentId = clean(req.query.id, 20)
       const list = await db().lrange(`comments:${postId}`, 0, -1)

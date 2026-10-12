@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      if (!isAdmin(req)) return res.status(403).json({ error: 'Yetkisiz' })
+      if (!(await isAdmin(req))) return res.status(403).json({ error: 'Yetkisiz' })
       const body = req.body
       if (!body || typeof body !== 'object' || Array.isArray(body)) return res.status(400).json({ error: 'Geçersiz veri' })
       if (JSON.stringify(body).length > MAX_SIZE) return res.status(413).json({ error: 'Ayarlar çok büyük' })

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { copyText } from './hooks'
 import { SiteContext, mergeSite, applyTheme } from './site'
-import { getAdminKey, verifyAdmin, forgetAdmin } from './admin'
+import { getAdminKey, verifyAdmin, logout as endSession, isLoginPath } from './admin'
 import Intro from './components/Intro'
 import Music from './components/Music'
 import Hero from './components/Hero'
@@ -9,6 +9,7 @@ import Story from './components/Story'
 import Gold from './components/Gold'
 import Memories from './components/Memories'
 import AdminPanel from './components/AdminPanel'
+import Login from './components/Login'
 import { Invite, When, Program, Venue, Outro } from './components/Sections'
 
 // Kaydedilecek veriden türetilmiş alanları çıkar
@@ -19,6 +20,7 @@ export default function App() {
   const [draft, setDraft] = useState(null)
   const [admin, setAdmin] = useState(null)
   const [editing, setEditing] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(isLoginPath)
   const [saving, setSaving] = useState(false)
   const [opened, setOpened] = useState(false)
   const [toast, setToast] = useState(null)
@@ -95,7 +97,7 @@ export default function App() {
 
   const logout = () => {
     if (draft && !window.confirm('Kaydedilmemiş değişiklikler silinecek. Devam edilsin mi?')) return
-    forgetAdmin()
+    endSession(admin)
     setAdmin(null)
     setDraft(null)
     setEditing(false)
@@ -119,7 +121,7 @@ export default function App() {
         <Venue onCopy={handleCopy} />
         {show.gold !== false && <Gold onCopy={handleCopy} />}
         {show.memories !== false && <Memories notify={notify} admin={admin} />}
-        <Outro onCopy={handleCopy} />
+        <Outro onCopy={handleCopy} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>
       <nav className={`dock ${docked && !editing ? 'dock--show' : ''}`}>
         <a href="#tarih">Tarih</a>
@@ -129,7 +131,7 @@ export default function App() {
       </nav>
 
       {admin && !editing && (
-        <button type="button" className="admin-fab" onClick={() => { setEditing(true); setDraft((d) => d ?? site) }}>
+        <button type="button" className="admin-fab" onClick={() => setEditing(true)}>
           ✎ Düzenle
         </button>
       )}
@@ -138,6 +140,21 @@ export default function App() {
           <AdminPanel site={site} adminKey={admin} notify={notify} dirty={Boolean(draft) && JSON.stringify(toSaved(draft)) !== JSON.stringify(toSaved(mergeSite(saved)))}
             saving={saving} onChange={setDraft} onSave={save} onCancel={cancel} onLogout={logout} onClose={closePanel} />
         </>
+      )}
+
+      {loginOpen && !admin && (
+        <Login
+          onClose={() => {
+            setLoginOpen(false)
+            if (isLoginPath()) window.history.replaceState(null, '', '/')
+          }}
+          onSuccess={(token) => {
+            setAdmin(token)
+            setLoginOpen(false)
+            setEditing(true)
+            if (isLoginPath()) window.history.replaceState(null, '', '/')
+            notify('Hoş geldin! Düzenlemeye başlayabilirsin ✓')
+          }} />
       )}
 
       <div className={`toast ${toast ? 'toast--show' : ''}`} role="status">{toast}</div>
