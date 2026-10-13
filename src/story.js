@@ -1,5 +1,6 @@
 import { formatDate } from './date'
 import { themeColors } from './site'
+import { t } from './i18n'
 
 const loadImage = (src) => new Promise((resolve) => {
   const img = new Image()
@@ -44,7 +45,7 @@ export async function makeStoryImage(config) {
     x.fillText(t.toLocaleUpperCase('tr').split('').join(String.fromCharCode(8202)), W / 2, y)
   }
 
-  spaced('Düğünümüze davetlisiniz', 150, '600 30px Manrope, sans-serif', col.champagne)
+  spaced(t('Düğünümüze davetlisiniz', 'You are invited to our wedding'), 150, '600 30px Manrope, sans-serif', col.champagne)
 
   // fotoğraf: cam çerçeveli kemer
   const photo = await loadImage(config.heroPhoto)
@@ -107,7 +108,7 @@ export async function makeStoryImage(config) {
   x.fillText(`${d.day} ${d.monthName} ${d.year} · ${d.weekday}`, W / 2, 1720)
   x.font = 'italic 400 40px "Cormorant Garamond", serif'
   x.globalAlpha = 0.75
-  x.fillText(`${config.venue.name} · Saat ${d.time}`, W / 2, 1782)
+  x.fillText(`${config.venue.name} · ${t('Saat', 'at')} ${d.time}`, W / 2, 1782)
   x.globalAlpha = 1
   spaced(window.location.host, 1860, '600 24px Manrope, sans-serif', col.champagne)
 

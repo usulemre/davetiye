@@ -5,6 +5,7 @@ import Section from './Section'
 import Qr from './Qr'
 import Confetti from './Confetti'
 import TableMap from './TableMap'
+import { t } from '../i18n'
 
 // Katılım bildirimi (LCV): kişiye özel linkle gelen misafir adıyla karşılanır
 export default function Rsvp({ guest, onGuest, notify }) {
@@ -30,7 +31,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
 
   const submit = async (e) => {
     e.preventDefault()
-    if (!status) return notify('Lütfen gelip gelemeyeceğinizi seçin')
+    if (!status) return notify(t('Lütfen gelip gelemeyeceğinizi seçin', 'Please choose whether you can come'))
     setBusy(true)
     try {
       const next = await sendRsvp({ g: guest?.id, name, status, count, note, song })
@@ -38,7 +39,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
       onGuest(next)
       setEditing(false)
       if (status === 'yes') setBurst((b) => b + 1)
-      notify(status === 'yes' ? 'Harika! Sizi bekliyoruz 💐' : 'Bildiriminiz alındı, teşekkürler 🤍')
+      notify(status === 'yes' ? t('Harika! Sizi bekliyoruz 💐', 'Wonderful! We can\'t wait to see you 💐') : t('Bildiriminiz alındı, teşekkürler 🤍', 'Got it, thank you 🤍'))
     } catch (err) {
       notify(err.message)
     } finally {
@@ -51,94 +52,94 @@ export default function Rsvp({ guest, onGuest, notify }) {
   return (
     <Section id="lcv" className="rsvp">
       <Confetti burst={burst} />
-      <p className="kicker">Lütfen bildirin</p>
-      <h2 className="heading">Katılım <em>durumu</em></h2>
+      <p className="kicker">{t('Lütfen bildirin', 'Kindly reply')}</p>
+      <h2 className="heading">{t(<>Katılım <em>durumu</em></>, <>Will you <em>join us</em>?</>)}</h2>
       <p className="rsvp__lead">
-        {guest ? <>Sevgili <b>{guest.name}</b>, </> : null}
+        {guest ? <>{t('Sevgili', 'Dear')} <b>{guest.name}</b>, </> : null}
         {config.rsvpDeadline
-          ? <>hazırlıklarımızı planlayabilmemiz için <b>{config.rsvpDeadline}</b> tarihine kadar bildirmenizi rica ederiz.</>
-          : <>hazırlıklarımızı planlayabilmemiz için katılım durumunuzu bildirmenizi rica ederiz.</>}
+          ? t(<>hazırlıklarımızı planlayabilmemiz için <b>{config.rsvpDeadline}</b> tarihine kadar bildirmenizi rica ederiz.</>, <>to help us plan, please let us know by <b>{config.rsvpDeadline}</b>.</>)
+          : t(<>hazırlıklarımızı planlayabilmemiz için katılım durumunuzu bildirmenizi rica ederiz.</>, <>to help us plan, please let us know if you can join us.</>)}
       </p>
 
       {guest?.rsvp && !editing ? (
         <div className="rsvp__done">
           <span className="rsvp__icon" aria-hidden="true">{yes ? '💐' : '🤍'}</span>
-          <p className="rsvp__title">{yes ? 'Sizi bekliyoruz!' : 'Yokluğunuzu hissedeceğiz'}</p>
+          <p className="rsvp__title">{yes ? t('Sizi bekliyoruz!', 'See you there!') : t('Yokluğunuzu hissedeceğiz', 'We will miss you')}</p>
           <p className="rsvp__sub">
-            {yes ? `${guest.rsvp.count} kişi olarak katılacağınızı bildirdiniz.` : 'Katılamayacağınızı bildirdiniz. Dualarınız yeter.'}
+            {yes ? t(`${guest.rsvp.count} kişi olarak katılacağınızı bildirdiniz.`, `You're coming as ${guest.rsvp.count} ${guest.rsvp.count > 1 ? 'people' : 'person'}.`) : t('Katılamayacağınızı bildirdiniz. Dualarınız yeter.', 'You let us know you can\'t make it. Your good wishes are enough.')}
           </p>
-          {yes && guest.rsvp.song && <p className="rsvp__songdone">🎵 Şarkı isteğiniz DJ'e iletildi: <b>{guest.rsvp.song}</b></p>}
+          {yes && guest.rsvp.song && <p className="rsvp__songdone">🎵 {t('Şarkı isteğiniz DJ\'e iletildi:', 'Your song request went to the DJ:')} <b>{guest.rsvp.song}</b></p>}
 
           {yes && (
             <div className="ticket">
               <div className="ticket__info">
-                <span className="ticket__label">Giriş kartınız</span>
+                <span className="ticket__label">{t('Giriş kartınız', 'Your entry card')}</span>
                 <strong>{guest.name}</strong>
-                <span>{guest.rsvp.count} kişi{guest.table ? '' : ' · Masa bilgisi yakında'}</span>
-                {guest.table && <span className="ticket__table">Masa <b>{guest.table}</b></span>}
+                <span>{guest.rsvp.count} {t('kişi', guest.rsvp.count > 1 ? 'guests' : 'guest')}{guest.table ? '' : t(' · Masa bilgisi yakında', ' · Table coming soon')}</span>
+                {guest.table && <span className="ticket__table">{t('Masa', 'Table')} <b>{guest.table}</b></span>}
               </div>
-              <Qr className="ticket__qr" text={guestLink(guest.id)} size={116} alt="Giriş QR kodu" />
-              <p className="ticket__hint">Girişte bu kodu görevliye gösterebilirsiniz</p>
+              <Qr className="ticket__qr" text={guestLink(guest.id)} size={116} alt={t('Giriş QR kodu', 'Entry QR code')} />
+              <p className="ticket__hint">{t('Girişte bu kodu görevliye gösterebilirsiniz', 'Show this code at the entrance')}</p>
             </div>
           )}
           {yes && <TableMap tables={guest.tables} mine={guest.table} />}
 
-          <button type="button" className="btn btn--line" onClick={() => setEditing(true)}>Cevabımı değiştir</button>
+          <button type="button" className="btn btn--line" onClick={() => setEditing(true)}>{t('Cevabımı değiştir', 'Change my answer')}</button>
         </div>
       ) : (
         <form className="rsvp__form" onSubmit={submit}>
           {!guest && (
             <label className="rsvp__field">
-              <span>Adınız soyadınız</span>
+              <span>{t('Adınız soyadınız', 'Your full name')}</span>
               <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="name" required />
             </label>
           )}
 
-          <div className="rsvp__choices" role="radiogroup" aria-label="Katılım durumu">
+          <div className="rsvp__choices" role="radiogroup" aria-label={t('Katılım durumu', 'Attendance')}>
             <button type="button" role="radio" aria-checked={status === 'yes'}
               className={`rsvp__choice ${status === 'yes' ? 'is-on' : ''}`} onClick={() => setStatus('yes')}>
               <svg viewBox="0 0 32 30" aria-hidden="true"><path d="M16 28S2 19.5 2 10.2A7.2 7.2 0 0 1 16 7a7.2 7.2 0 0 1 14 3.2C30 19.5 16 28 16 28Z" /></svg>
-              <b>Geliyorum</b>
-              <small>Seve seve!</small>
+              <b>{t('Geliyorum', 'I\'ll be there')}</b>
+              <small>{t('Seve seve!', 'With pleasure!')}</small>
             </button>
             <button type="button" role="radio" aria-checked={status === 'no'}
               className={`rsvp__choice ${status === 'no' ? 'is-on' : ''}`} onClick={() => setStatus('no')}>
               <svg viewBox="0 0 32 30" aria-hidden="true"><path d="M16 28S2 19.5 2 10.2A7.2 7.2 0 0 1 16 7a7.2 7.2 0 0 1 14 3.2C30 19.5 16 28 16 28Z" /><path d="M17 8l-3 7 4 2-3 8" /></svg>
-              <b>Gelemiyorum</b>
-              <small>Maalesef</small>
+              <b>{t('Gelemiyorum', 'Can\'t make it')}</b>
+              <small>{t('Maalesef', 'Sadly')}</small>
             </button>
           </div>
 
           {status === 'yes' && (
             <div className="rsvp__count">
-              <span>Kaç kişi geleceksiniz?</span>
+              <span>{t('Kaç kişi geleceksiniz?', 'How many of you?')}</span>
               <div className="stepper">
-                <button type="button" aria-label="Azalt" disabled={count <= 1} onClick={() => setCount((c) => Math.max(1, c - 1))}>−</button>
+                <button type="button" aria-label={t('Azalt', 'Fewer')} disabled={count <= 1} onClick={() => setCount((c) => Math.max(1, c - 1))}>−</button>
                 <b>{count}</b>
-                <button type="button" aria-label="Artır" disabled={count >= max} onClick={() => setCount((c) => Math.min(max, c + 1))}>+</button>
+                <button type="button" aria-label={t('Artır', 'More')} disabled={count >= max} onClick={() => setCount((c) => Math.min(max, c + 1))}>+</button>
               </div>
-              {guest && guest.seats > 1 && <small>Davetiniz {guest.seats} kişiliktir</small>}
+              {guest && guest.seats > 1 && <small>{t(`Davetiniz ${guest.seats} kişiliktir`, `Your invitation is for ${guest.seats}`)}</small>}
             </div>
           )}
 
           {status === 'yes' && (
             <label className="rsvp__field rsvp__song">
-              <span>🎵 DJ'e şarkı isteğin <i>(isteğe bağlı)</i></span>
+              <span>🎵 {t('DJ\'e şarkı isteğin', 'Song request for the DJ')} <i>{t('(isteğe bağlı)', '(optional)')}</i></span>
               <input value={song} onChange={(e) => setSong(e.target.value)} maxLength={120}
-                placeholder="Ör. Tarkan – Kuzu Kuzu" />
+                placeholder={t('Ör. Tarkan – Kuzu Kuzu', 'e.g. Ed Sheeran – Perfect')} />
             </label>
           )}
 
           <label className="rsvp__field">
-            <span>Bize bir notunuz var mı? <i>(isteğe bağlı)</i></span>
+            <span>{t('Bize bir notunuz var mı?', 'A note for us?')} <i>{t('(isteğe bağlı)', '(optional)')}</i></span>
             <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} />
           </label>
 
           <button type="submit" className="btn btn--solid rsvp__send" disabled={busy || !status}>
-            {busy ? 'Gönderiliyor…' : 'Gönder'}
+            {busy ? t('Gönderiliyor…', 'Sending…') : t('Gönder', 'Send')}
           </button>
           {guest?.rsvp && (
-            <button type="button" className="alink rsvp__cancel" onClick={() => setEditing(false)}>Vazgeç</button>
+            <button type="button" className="alink rsvp__cancel" onClick={() => setEditing(false)}>{t('Vazgeç', 'Cancel')}</button>
           )}
         </form>
       )}

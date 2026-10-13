@@ -3,6 +3,7 @@ import { useSite, themeColors } from '../site'
 import { isLoginPath } from '../admin'
 import { formatDate } from '../date'
 import { isLite } from '../perf'
+import { t } from '../i18n'
 
 const rand = (a, b) => a + Math.random() * (b - a)
 
@@ -71,7 +72,7 @@ export default function Intro({ onOpen, guestName }) {
   return (
     <div className={`intro intro--${state} ${three === 'off' ? '' : 'intro--3d'}`} onClick={open}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open()}
-      role="button" tabIndex={0} aria-label="Davetiyeyi aç">
+      role="button" tabIndex={0} aria-label={t('Davetiyeyi aç', 'Open the invitation')}>
       <div className="intro__dust" aria-hidden="true">
         {dust.map((s, i) => (
           <i key={i} style={{ left: s.left, top: s.top, width: s.size, height: s.size, animationDelay: s.delay, animationDuration: s.dur }} />
@@ -79,13 +80,13 @@ export default function Intro({ onOpen, guestName }) {
       </div>
 
       <p className="kicker kicker--light intro__kicker">
-        {guestName ? <>Sevgili {guestName},<br />bir davetiyeniz var</> : 'Bir davetiyeniz var'}
+        {guestName ? <>{t('Sevgili', 'Dear')} {guestName},<br />{t('bir davetiyeniz var', 'you have an invitation')}</> : t('Bir davetiyeniz var', 'You have an invitation')}
       </p>
 
       {(three === 'wait' || three === 'on') && (
         <Suspense fallback={null}>
           <Envelope3D opening={state !== 'idle'} colors={themeColors(config)} initials={config.initials}
-            card={{ kicker: config.eventType, groom: `${config.groom.first} ${config.groom.last}`, bride: `${config.bride.first} ${config.bride.last}`, date: `${d.day} · ${d.month} · ${d.year}` }}
+            card={{ kicker: t(config.eventType, 'Wedding'), groom: `${config.groom.first} ${config.groom.last}`, bride: `${config.bride.first} ${config.bride.last}`, date: `${d.day} · ${d.month} · ${d.year}` }}
             onReady={() => setThree((v) => (v === 'wait' ? 'on' : v))} onFail={() => setThree('css')} />
         </Suspense>
       )}
@@ -125,7 +126,7 @@ export default function Intro({ onOpen, guestName }) {
         <em>&amp;</em>
         <span>{config.bride.first} {config.bride.last}</span>
       </p>
-      <p className="intro__hint">Mührü kırmak için dokunun</p>
+      <p className="intro__hint">{t('Mührü kırmak için dokunun', 'Tap to break the seal')}</p>
     </div>
   )
 }

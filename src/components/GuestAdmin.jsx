@@ -71,10 +71,16 @@ function summary(guests) {
 function whatsappText(site, g, reminder) {
   const d = formatDate(site.start)
   const couple = `${site.groom.first} & ${site.bride.first}`
-  if (reminder) {
-    return `Merhaba ${g.name} 🤍\n\n${couple} düğününe katılıp katılamayacağınızı henüz öğrenemedik. Aşağıdaki linkten birkaç saniyede bildirebilirsiniz:\n\n${guestLink(g.id)}`
+  const link = guestLink(g.id, g.lang)
+  if (g.lang === 'en') {
+    const day = new Date(site.start).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Istanbul' })
+    if (reminder) return `Hello ${g.name} 🤍\n\nWe haven't heard yet whether you can join ${couple}'s wedding. You can let us know in a few seconds here:\n\n${link}`
+    return `Hello ${g.name} 🤍\n\nWe, ${couple}, are getting married on ${day} at ${site.venue.name} and would love to celebrate with you 💍\n\nYour invitation and RSVP:\n${link}`
   }
-  return `Merhaba ${g.name} 🤍\n\n${couple} olarak ${d.day} ${d.monthName} ${d.year} ${d.weekday} günü ${site.venue.name}'da evleniyoruz ve sizi de aramızda görmek istiyoruz 💍\n\nDavetiyeniz ve katılım bildirimi için:\n${guestLink(g.id)}`
+  if (reminder) {
+    return `Merhaba ${g.name} 🤍\n\n${couple} düğününe katılıp katılamayacağınızı henüz öğrenemedik. Aşağıdaki linkten birkaç saniyede bildirebilirsiniz:\n\n${link}`
+  }
+  return `Merhaba ${g.name} 🤍\n\n${couple} olarak ${d.day} ${d.monthName} ${d.year} ${d.weekday} günü ${site.venue.name}'da evleniyoruz ve sizi de aramızda görmek istiyoruz 💍\n\nDavetiyeniz ve katılım bildirimi için:\n${link}`
 }
 
 // wa.me kısa linki yönlendirirken emojileri bozuyor (🤍 → �); doğrudan api.whatsapp.com kullanılır
@@ -172,7 +178,7 @@ export function GuestList({ store, site, notify }) {
             <button type="button" className="gitem__main" onClick={() => setOpen(open === g.id ? null : g.id)}>
               <span className="gitem__name">{g.name}</span>
               <span className="gitem__meta">
-                {g.seats} kişilik{g.table && ` · Masa ${g.table}`}{g.side && ` · ${g.side === 'damat' ? 'Damat' : 'Gelin'}`}{g.source === 'site' && ' · Siteden'}
+                {g.seats} kişilik{g.table && ` · Masa ${g.table}`}{g.side && ` · ${g.side === 'damat' ? 'Damat' : 'Gelin'}`}{g.source === 'site' && ' · Siteden'}{g.lang === 'en' && ' · EN'}
               </span>
               <StatusChip g={g} />
               {g.rsvp?.note && <span className="gitem__note">“{g.rsvp.note}”</span>}
@@ -185,7 +191,7 @@ export function GuestList({ store, site, notify }) {
                 {statusOf(g) === 'wait' && g.sentAt ? 'Hatırlat' : 'WhatsApp'}
               </a>
               <button type="button" className="gbtn"
-                onClick={async () => notify((await copyText(guestLink(g.id))) ? 'Kişiye özel link kopyalandı 🔗' : 'Kopyalanamadı')}>
+                onClick={async () => notify((await copyText(guestLink(g.id, g.lang))) ? 'Kişiye özel link kopyalandı 🔗' : 'Kopyalanamadı')}>
                 Link
               </button>
             </div>
@@ -324,7 +330,7 @@ function AddGuest({ store, notify, bulk, setBulk, onClose }) {
 }
 
 function EditGuest({ g, store, onDone }) {
-  const [d, setD] = useState({ name: g.name, phone: g.phone, seats: g.seats, table: g.table, side: g.side })
+  const [d, setD] = useState({ name: g.name, phone: g.phone, seats: g.seats, table: g.table, side: g.side, lang: g.lang || 'tr' })
   const save = async () => { if (await store.update({ id: g.id, ...d }, 'Kaydedildi ✓')) onDone() }
   const setRsvp = (status) => store.update({ id: g.id, rsvp: status ? { status, count: g.rsvp?.count || g.seats, note: g.rsvp?.note, song: g.rsvp?.song } : null }, 'Durum güncellendi ✓')
   return (
@@ -342,6 +348,12 @@ function EditGuest({ g, store, onDone }) {
           </select>
         </label>
       </div>
+      <label className="afield"><span>Davet dili</span>
+        <select value={d.lang} onChange={(e) => setD({ ...d, lang: e.target.value })}>
+          <option value="tr">Türkçe</option>
+          <option value="en">English (yabancı misafir: mesaj ve site İngilizce)</option>
+        </select>
+      </label>
       <p className="ahint">Telefonla cevap verdiyse durumunu buradan işaretleyebilirsin:</p>
       <div className="gfilters">
         <button type="button" className={statusOf(g) === 'yes' ? 'is-active' : ''} onClick={() => setRsvp('yes')}>Geliyor</button>

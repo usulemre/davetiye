@@ -32,6 +32,20 @@ export function applyTheme(site) {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', c.ink)
 }
 
+// Kaydedilmiş metin varsayılanla aynıysa, varsayılanın hazır İngilizcesini kullan
+function borrowEn(list, base, fields) {
+  if (!Array.isArray(list)) return list
+  return list.map((item) => {
+    const out = { ...item }
+    for (const f of fields) {
+      if (out[`${f}En`]) continue
+      const match = base.find((b) => b[f] && b[f].trim() === String(item[f] || '').trim() && b[`${f}En`])
+      if (match) out[`${f}En`] = match[`${f}En`]
+    }
+    return out
+  })
+}
+
 // Kaydedilmiş ayarları varsayılanlarla birleştir
 export function mergeSite(saved = {}) {
   const obj = (k) => ({ ...defaults[k], ...(saved[k] || {}) })
@@ -44,6 +58,10 @@ export function mergeSite(saved = {}) {
     gift: obj('gift'),
     sections: obj('sections'),
   }
+  site.story = borrowEn(site.story, defaults.story, ['title', 'text'])
+  site.program = borrowEn(site.program, defaults.program, ['title', 'note'])
+  site.faq = borrowEn(site.faq, defaults.faq, ['q', 'a'])
+  if (!site.inviteTextEn && site.inviteText === defaults.inviteText) site.inviteTextEn = defaults.inviteTextEn
   site.initials = [site.groom.first.charAt(0) || '·', site.bride.first.charAt(0) || '·']
   return site
 }

@@ -5,6 +5,7 @@ export const defaults = {
   eventType: 'Düğün',
 
   inviteText: 'Bir akvaryumun önünde başlayan hikâyemiz, şimdi en güzel bölümüne geliyor. Hayatımızı birleştirdiğimiz bu özel günde sizi de yanımızda görmek en büyük mutluluğumuz olacak.',
+  inviteTextEn: 'Our story began in front of an aquarium, and now it reaches its most beautiful chapter. It would mean the world to us to have you by our side on the day we join our lives.',
   hashtag: '#MuhammedİsmetVeTuğçe',
 
   theme: 'inci',
@@ -30,10 +31,14 @@ export const defaults = {
 
   // Sıkça sorulanlar (panelden düzenlenebilir)
   faq: [
-    { q: 'Çocuklarımızı da getirebilir miyiz?', a: 'Elbette! Minik misafirlerimizi de aramızda görmekten mutluluk duyarız 🧸' },
-    { q: 'Kıyafet kuralı var mı?', a: 'Şık ve rahat olmanız yeterli. Akşam serin olabileceği için yanınıza ince bir ceket almanızı öneririz.' },
-    { q: 'Mekâna nasıl gelebilirim?', a: 'Konum bölümündeki "Yol Tarifi Al" butonuna dokunursanız telefonunuzdaki harita size yolu gösterir.' },
-    { q: 'Düğünde çektiğim fotoğrafları nasıl paylaşırım?', a: 'Anı Duvarı\'na fotoğraf ekleyebilirsiniz. Masalardaki QR kodu okutmanız yeterli; fotoğraflarınız düğün gecesi dev ekranda da görünür.' },
+    { q: 'Çocuklarımızı da getirebilir miyiz?', a: 'Elbette! Minik misafirlerimizi de aramızda görmekten mutluluk duyarız 🧸',
+      qEn: 'Can we bring our children?', aEn: 'Of course! We would love to have our little guests with us 🧸' },
+    { q: 'Kıyafet kuralı var mı?', a: 'Şık ve rahat olmanız yeterli. Akşam serin olabileceği için yanınıza ince bir ceket almanızı öneririz.',
+      qEn: 'Is there a dress code?', aEn: 'Smart and comfortable is perfect. The evening may get cool, so a light jacket is a good idea.' },
+    { q: 'Mekâna nasıl gelebilirim?', a: 'Konum bölümündeki "Yol Tarifi Al" butonuna dokunursanız telefonunuzdaki harita size yolu gösterir.',
+      qEn: 'How do I get to the venue?', aEn: 'Tap "Get Directions" in the venue section and your phone\'s map will guide you.' },
+    { q: 'Düğünde çektiğim fotoğrafları nasıl paylaşırım?', a: 'Anı Duvarı\'na fotoğraf ekleyebilirsiniz. Masalardaki QR kodu okutmanız yeterli; fotoğraflarınız düğün gecesi dev ekranda da görünür.',
+      qEn: 'How can I share my photos from the wedding?', aEn: 'Add them to the Memory Wall: just scan the QR code on your table. Your photos will also appear on the big screen that night.' },
   ],
 
   // Arka plan müziği: public/ klasöründeki ses dosyası
@@ -44,18 +49,21 @@ export const defaults = {
 
   story: [
     { no: '01', title: 'Teklif', photo: '/teklif.jpg', pos: '35% 50%',
-      text: 'Su altında, bir dalgıç ve tek bir soru. Cevap tahmin edilebilir: Evet! 🐠' },
+      text: 'Su altında, bir dalgıç ve tek bir soru. Cevap tahmin edilebilir: Evet! 🐠',
+      titleEn: 'The proposal', textEn: 'Underwater, a diver and a single question. You can guess the answer: Yes! 🐠' },
     { no: '02', title: 'Söz', photo: '/soz.jpg', pos: '50% 60%',
-      text: 'Better together. Neon tabela da onayladı, artık resmî.' },
+      text: 'Better together. Neon tabela da onayladı, artık resmî.',
+      titleEn: 'The promise', textEn: 'Better together. Even the neon sign agreed, it\'s official.' },
     { no: '03', title: 'Nişan', photo: '/nisan.jpg', pos: '60% 40%',
-      text: 'Yedi katlı pasta, bir pembe prenses ve kurdeleler kesildi.' },
+      text: 'Yedi katlı pasta, bir pembe prenses ve kurdeleler kesildi.',
+      titleEn: 'The engagement', textEn: 'A seven-tier cake, a princess in pink and ribbons cut.' },
   ],
 
   program: [
-    { time: '19:00', title: 'Karşılama', note: 'Sarılmalar, tokalaşmalar, "ne kadar büyümüşsün"ler' },
-    { time: '20:00', title: 'Nikâh', note: '"Evet" anı. Bu sefer su üstünde 😄' },
-    { time: '20:30', title: 'Takı Merasimi', note: 'Altınlar boyuna, kurdeleler omuza' },
-    { time: '21:00', title: 'Yemek & Eğlence', note: 'Halay başı kapışılır, dikkat' },
+    { time: '19:00', title: 'Karşılama', note: 'Sarılmalar, tokalaşmalar, "ne kadar büyümüşsün"ler', titleEn: 'Welcome', noteEn: 'Hugs, handshakes and "look how you\'ve grown"s' },
+    { time: '20:00', title: 'Nikâh', note: '"Evet" anı. Bu sefer su üstünde 😄', titleEn: 'Ceremony', noteEn: 'The "I do" moment. Above water this time 😄' },
+    { time: '20:30', title: 'Takı Merasimi', note: 'Altınlar boyuna, kurdeleler omuza', titleEn: 'Gold ceremony', noteEn: 'Guests pin gold coins on the couple, a Turkish tradition' },
+    { time: '21:00', title: 'Yemek & Eğlence', note: 'Halay başı kapışılır, dikkat', titleEn: 'Dinner & party', noteEn: 'Everyone will want to lead the halay dance, be warned' },
   ],
 
   // ⚠️ IBAN'I GÜNCELLEYİN

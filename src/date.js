@@ -1,8 +1,10 @@
+import { locale } from './i18n'
+
 const tz = 'Europe/Istanbul'
 
 export function formatDate(iso) {
   const date = new Date(iso)
-  const part = (opts) => new Intl.DateTimeFormat('tr-TR', { timeZone: tz, ...opts }).format(date)
+  const part = (opts) => new Intl.DateTimeFormat(locale(), { timeZone: tz, ...opts }).format(date)
   return {
     day: part({ day: '2-digit' }),
     month: part({ month: '2-digit' }),

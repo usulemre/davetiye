@@ -8,6 +8,7 @@ import Music from './components/Music'
 import Hero from './components/Hero'
 import Orbs from './components/Orbs'
 import Safe from './components/Safe'
+import { t, getLang, setLang } from './i18n'
 import Story from './components/Story'
 import Gold from './components/Gold'
 import Memories from './components/Memories'
@@ -37,6 +38,12 @@ export default function App() {
   const [toast, setToast] = useState(null)
   const [docked, setDocked] = useState(false)
   const [guest, setGuest] = useState(null)
+  const [lang, setLangState] = useState(getLang)
+  const switchLang = () => {
+    const next = lang === 'en' ? 'tr' : 'en'
+    setLang(next)
+    setLangState(next)
+  }
   const timer = useRef()
   const music = useRef(null)
   const bar = useRef(null)
@@ -82,7 +89,7 @@ export default function App() {
 
   const handleCopy = useCallback(async (text, message) => {
     const ok = await copyText(text)
-    notify(ok ? message : 'Kopyalanamadı, elle seçip kopyalayabilirsiniz')
+    notify(ok ? message : t('Kopyalanamadı, elle seçip kopyalayabilirsiniz', 'Could not copy, please select and copy it manually'))
   }, [notify])
 
   const save = async () => {
@@ -144,6 +151,11 @@ export default function App() {
       </Safe>
       <div className="progress" ref={bar} aria-hidden="true" />
       <Safe name="muzik"><Music key={site.music} ref={music} /></Safe>
+      {!editing && (
+        <button type="button" className="lang" onClick={switchLang} aria-label={lang === 'en' ? 'Türkçe' : 'English'}>
+          <b className={lang === 'tr' ? 'is-on' : ''}>TR</b><i /><b className={lang === 'en' ? 'is-on' : ''}>EN</b>
+        </button>
+      )}
       <main className={`page ${opened ? 'page--opened' : ''}`}>
         <Orbs />
         <Safe name="kapak"><Hero opened={opened} /></Safe>
@@ -162,11 +174,11 @@ export default function App() {
         <Outro onCopy={handleCopy} notify={notify} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>
       <nav className={`dock ${docked && !editing ? 'dock--show' : ''}`}>
-        {show.rsvp !== false && <a href="#lcv" className="dock__rsvp">Katılım</a>}
-        <a href="#tarih">Tarih</a>
-        <a href="#konum">Konum</a>
-        {show.memories !== false && <a href="#anilar">Anılar</a>}
-        {show.gold !== false && <a href="#altin" className="dock__gold">Altın</a>}
+        {show.rsvp !== false && <a href="#lcv" className="dock__rsvp">{t('Katılım', 'RSVP')}</a>}
+        <a href="#tarih">{t('Tarih', 'Date')}</a>
+        <a href="#konum">{t('Konum', 'Venue')}</a>
+        {show.memories !== false && <a href="#anilar">{t('Anılar', 'Memories')}</a>}
+        {show.gold !== false && <a href="#altin" className="dock__gold">{t('Altın', 'Gold')}</a>}
       </nav>
 
       {admin && linkCode() && guest && !editing && (

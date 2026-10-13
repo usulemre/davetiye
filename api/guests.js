@@ -11,6 +11,7 @@ function shape(input, prev = {}) {
     seats: Math.min(20, Math.max(1, Math.round(Number(pick('seats')) || 1))),
     table: clean(pick('table'), 20),
     side: SIDES.includes(pick('side')) ? pick('side') : '',
+    lang: pick('lang') === 'en' ? 'en' : 'tr',
   }
 }
 

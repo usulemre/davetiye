@@ -4,6 +4,7 @@ import { formatDate } from '../date'
 import { useTilt } from '../fx'
 import { useNow, phaseOf } from '../live'
 import { isLite } from '../perf'
+import { t } from '../i18n'
 
 const LITE = isLite()
 
@@ -14,7 +15,7 @@ export default function Hero({ opened }) {
   const d = formatDate(config.start)
   const tilt = useTilt(12)
   const phase = phaseOf(config, useNow())
-  const kicker = { today: 'Bugün evleniyoruz!', live: 'Şu an evleniyoruz', after: 'Evlendik!' }[phase] || 'Evleniyoruz'
+  const kicker = { today: t('Bugün evleniyoruz!', 'We\'re getting married today!'), live: t('Şu an evleniyoruz', 'We\'re getting married right now'), after: t('Evlendik!', 'Just married!') }[phase] || t('Evleniyoruz', 'We\'re getting married')
   return (
     <header className="hero">
       <div className="hero__stage">
@@ -46,15 +47,15 @@ export default function Hero({ opened }) {
           <b>{d.day}</b>
           <span>{d.monthName} {d.year}</span>
         </p>
-        <p className="hero__venue">{config.venue.name} · Saat {d.time}</p>
+        <p className="hero__venue">{config.venue.name} · {t('Saat', 'at')} {d.time}</p>
 
         <div className="hero__frame" ref={tilt}>
-          <img src={config.heroPhoto} alt={`${config.groom.first} ve ${config.bride.first}`} />
+          <img src={config.heroPhoto} alt={`${config.groom.first} ${t('ve', 'and')} ${config.bride.first}`} />
           <span className="hero__badge glass">{d.day}.{d.month}.{d.year}</span>
         </div>
       </div>
 
-      <a href="#davet" className="hero__scroll" aria-label="Aşağı kaydır">
+      <a href="#davet" className="hero__scroll" aria-label={t('Aşağı kaydır', 'Scroll down')}>
         <i />
       </a>
     </header>

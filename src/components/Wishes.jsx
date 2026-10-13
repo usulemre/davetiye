@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Section from './Section'
+import { t } from '../i18n'
 
 const EMOJIS = ['🤍', '💐', '🥂', '💍', '✨', '🎉']
 const NAME_KEY = 'davetiye:name'
@@ -20,16 +21,16 @@ export default function Wishes({ notify, admin }) {
 
   const send = async (e) => {
     e.preventDefault()
-    if (!name.trim() || text.trim().length < 2) return notify('Adını ve dileğini yazar mısın? 🙂')
+    if (!name.trim() || text.trim().length < 2) return notify(t('Adını ve dileğini yazar mısın? 🙂', 'Please add your name and wish 🙂'))
     setBusy(true)
     try {
       const res = await fetch('/api/wishes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, text, emoji }) })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Gönderilemedi')
+      if (!res.ok) throw new Error(data.error || t('Gönderilemedi', 'Could not send'))
       localStorage.setItem(NAME_KEY, name.trim())
       setWishes((w) => [{ ...data.wish, fresh: true }, ...(w || [])])
       setText('')
-      notify('Dileğin gelinle damada ulaştı 🤍')
+      notify(t('Dileğin gelinle damada ulaştı 🤍', 'Your wish reached the couple 🤍'))
     } catch (err) {
       notify(err.message)
     } finally {
@@ -46,22 +47,22 @@ export default function Wishes({ notify, admin }) {
 
   return (
     <Section id="dilekler" className="wishes">
-      <p className="kicker">Dilek kutusu</p>
-      <h2 className="heading">İyi <em>dilekleriniz</em></h2>
-      <p className="wishes__lead">Bize bir iki satır bırakın; hepsini saklayacak, yıllar sonra yeniden okuyacağız.</p>
+      <p className="kicker">{t('Dilek kutusu', 'Wish box')}</p>
+      <h2 className="heading">{t(<>İyi <em>dilekleriniz</em></>, <>Your <em>wishes</em></>)}</h2>
+      <p className="wishes__lead">{t('Bize bir iki satır bırakın; hepsini saklayacak, yıllar sonra yeniden okuyacağız.', 'Leave us a line or two; we will keep them all and read them again years from now.')}</p>
 
       <form className="wishes__form" onSubmit={send}>
-        <div className="wishes__emojis" role="radiogroup" aria-label="Simge">
+        <div className="wishes__emojis" role="radiogroup" aria-label={t('Simge', 'Icon')}>
           {EMOJIS.map((em) => (
             <button key={em} type="button" role="radio" aria-checked={emoji === em}
               className={emoji === em ? 'is-on' : ''} onClick={() => setEmoji(em)}>{em}</button>
           ))}
         </div>
         <textarea className="field" rows={3} maxLength={240} value={text} onChange={(e) => setText(e.target.value)}
-          placeholder="Bir ömür boyu mutluluklar…" />
+          placeholder={t('Bir ömür boyu mutluluklar…', 'A lifetime of happiness…')} />
         <div className="wishes__row">
-          <input className="field" placeholder="Adın" maxLength={40} value={name} onChange={(e) => setName(e.target.value)} />
-          <button type="submit" className="btn btn--solid" disabled={busy}>{busy ? 'Gönderiliyor…' : 'Gönder'}</button>
+          <input className="field" placeholder={t('Adın', 'Your name')} maxLength={40} value={name} onChange={(e) => setName(e.target.value)} />
+          <button type="submit" className="btn btn--solid" disabled={busy}>{busy ? t('Gönderiliyor…', 'Sending…') : t('Gönder', 'Send')}</button>
         </div>
         <small className="wishes__count">{text.length}/240</small>
       </form>
@@ -73,13 +74,13 @@ export default function Wishes({ notify, admin }) {
               <span className="wish__emoji" aria-hidden="true">{w.emoji}</span>
               <blockquote>{w.text}</blockquote>
               <figcaption>— {w.name}</figcaption>
-              {admin && <button type="button" className="wish__del" onClick={() => remove(w)} aria-label="Dileği sil">×</button>}
+              {admin && <button type="button" className="wish__del" onClick={() => remove(w)} aria-label={t('Dileği sil', 'Delete wish')}>×</button>}
             </figure>
           ))}
         </div>
       )}
       {wishes?.length > shown && (
-        <button type="button" className="btn btn--line wishes__more" onClick={() => setShown((n) => n + PAGE)}>Daha fazla dilek</button>
+        <button type="button" className="btn btn--line wishes__more" onClick={() => setShown((n) => n + PAGE)}>{t('Daha fazla dilek', 'More wishes')}</button>
       )}
     </Section>
   )

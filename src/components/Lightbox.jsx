@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { t } from '../i18n'
 
 // Anı Duvarı fotoğraflarını tam ekran gösterir; parmakla kaydırma, ok tuşları, Esc
 export default function Lightbox({ posts, index, onClose, onIndex }) {
@@ -34,11 +35,11 @@ export default function Lightbox({ posts, index, onClose, onIndex }) {
   }
 
   return createPortal(
-    <div className="lb" role="dialog" aria-label="Fotoğraf" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <button type="button" className="lb__close" onClick={onClose} aria-label="Kapat">×</button>
+    <div className="lb" role="dialog" aria-label={t('Fotoğraf', 'Photo')} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <button type="button" className="lb__close" onClick={onClose} aria-label={t('Kapat', 'Close')}>×</button>
       <span className="lb__count">{index + 1} / {posts.length}</span>
-      {index > 0 && <button type="button" className="lb__nav lb__nav--l" onClick={() => go(-1)} aria-label="Önceki">‹</button>}
-      {index < posts.length - 1 && <button type="button" className="lb__nav lb__nav--r" onClick={() => go(1)} aria-label="Sonraki">›</button>}
+      {index > 0 && <button type="button" className="lb__nav lb__nav--l" onClick={() => go(-1)} aria-label={t('Önceki', 'Previous')}>‹</button>}
+      {index < posts.length - 1 && <button type="button" className="lb__nav lb__nav--r" onClick={() => go(1)} aria-label={t('Sonraki', 'Next')}>›</button>}
       <div className="lb__stage" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
         {post.type === 'video' ? (
           <video key={post.id} src={post.url} poster={post.poster || undefined} controls autoPlay playsInline />

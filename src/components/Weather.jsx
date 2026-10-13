@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { formatDate } from '../date'
+import { t } from '../i18n'
 
-const CODES = [
-  [[0], '☀️', 'Açık'], [[1, 2], '🌤️', 'Parçalı bulutlu'], [[3], '☁️', 'Bulutlu'], [[45, 48], '🌫️', 'Sisli'],
-  [[51, 53, 55, 56, 57], '🌦️', 'Çiseleme'], [[61, 63, 65, 66, 67, 80, 81, 82], '🌧️', 'Yağmurlu'],
-  [[71, 73, 75, 77, 85, 86], '❄️', 'Karlı'], [[95, 96, 99], '⛈️', 'Gök gürültülü'],
+const CODES = () => [
+  [[0], '☀️', t('Açık', 'Clear')], [[1, 2], '🌤️', t('Parçalı bulutlu', 'Partly cloudy')], [[3], '☁️', t('Bulutlu', 'Cloudy')], [[45, 48], '🌫️', t('Sisli', 'Foggy')],
+  [[51, 53, 55, 56, 57], '🌦️', t('Çiseleme', 'Drizzle')], [[61, 63, 65, 66, 67, 80, 81, 82], '🌧️', t('Yağmurlu', 'Rainy')],
+  [[71, 73, 75, 77, 85, 86], '❄️', t('Karlı', 'Snowy')], [[95, 96, 99], '⛈️', t('Gök gürültülü', 'Thunderstorms')],
 ]
-const describe = (code) => CODES.find(([list]) => list.includes(code)) || [[], '🌡️', 'Değişken']
+const describe = (code) => CODES().find(([list]) => list.includes(code)) || [[], '🌡️', t('Değişken', 'Changeable')]
 
 // Düğüne 15 gün kala o akşamın hava tahmini (Open-Meteo, anahtarsız)
 export default function Weather({ config }) {
@@ -36,17 +37,17 @@ export default function Weather({ config }) {
   if (!w) return null
   const [, icon, label] = describe(w.code)
   const tips = []
-  if (w.night < 10) tips.push('Gece soğuk olacak, kalın bir mont almayı unutmayın 🧥')
-  else if (w.night < 18) tips.push('Akşam serin olabilir, yanınıza bir ceket alın 🧣')
-  else tips.push('Hava güzel görünüyor, dansa hazır olun 💃')
-  if (w.rain >= 50) tips.push('Yağmur ihtimali yüksek, şemsiyenizi de alın ☂️')
+  if (w.night < 10) tips.push(t('Gece soğuk olacak, kalın bir mont almayı unutmayın 🧥', 'It will be cold at night, bring a warm coat 🧥'))
+  else if (w.night < 18) tips.push(t('Akşam serin olabilir, yanınıza bir ceket alın 🧣', 'The evening may be cool, bring a jacket 🧣'))
+  else tips.push(t('Hava güzel görünüyor, dansa hazır olun 💃', 'Looks lovely, get ready to dance 💃'))
+  if (w.rain >= 50) tips.push(t('Yağmur ihtimali yüksek, şemsiyenizi de alın ☂️', 'Rain is likely, bring an umbrella ☂️'))
   return (
     <div className="weather">
       <span className="weather__icon" aria-hidden="true">{icon}</span>
       <div>
-        <span className="weather__label">Düğün akşamı hava tahmini</span>
+        <span className="weather__label">{t('Düğün akşamı hava tahmini', 'Forecast for the evening')}</span>
         <strong>{w.temp}° · {label}</strong>
-        <small>Gece {w.night}°{w.rain ? ` · yağış ihtimali %${w.rain}` : ''}</small>
+        <small>{t('Gece', 'Night')} {w.night}°{w.rain ? t(` · yağış ihtimali %${w.rain}`, ` · ${w.rain}% chance of rain`) : ''}</small>
         <p>{tips.join(' ')}</p>
       </div>
     </div>

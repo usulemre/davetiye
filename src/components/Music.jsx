@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useSite } from '../site'
+import { t } from '../i18n'
 
 const Music = forwardRef(function Music(_, ref) {
   const config = useSite()
@@ -71,7 +72,7 @@ const Music = forwardRef(function Music(_, ref) {
       <button type="button" className={`music ${playing ? 'music--on' : ''} ${tucked ? 'music--tucked' : ''}`}
         onClick={(e) => { e.stopPropagation(); toggle() }}
         onTouchEnd={(e) => e.stopPropagation()}
-        aria-label={playing ? 'Müziği kapat' : 'Müziği aç'}>
+        aria-label={playing ? t('Müziği kapat', 'Mute music') : t('Müziği aç', 'Play music')}>
         <span /><span /><span /><span />
       </button>
     </>

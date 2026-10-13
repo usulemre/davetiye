@@ -9,7 +9,8 @@ export function linkCode() {
 export const myCode = () => linkCode() || localStorage.getItem(KEY)
 export const rememberCode = (id) => localStorage.setItem(KEY, id)
 
-export const guestLink = (id) => `${window.location.origin}/?d=${id}`
+// İngilizce davetli için link siteyi İngilizce açar
+export const guestLink = (id, lang) => `${window.location.origin}/?d=${id}${lang === 'en' ? '&lang=en' : ''}`
 
 async function call(url, opts = {}, adminKey) {
   const res = await fetch(url, {

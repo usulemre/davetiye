@@ -1,3 +1,5 @@
+import { t } from '../i18n'
+
 // Misafirin giriş kartında: salonun küçük planı, kendi masası parlıyor
 export default function TableMap({ tables, mine }) {
   if (!tables?.length || !mine) return null
@@ -9,9 +11,9 @@ export default function TableMap({ tables, mine }) {
   const h = rows * cell + 56
   return (
     <figure className="tmap">
-      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`Salon planı, sizin masanız ${mine}`}>
+      <svg viewBox={`0 0 ${w} ${h}`} role="img" aria-label={t(`Salon planı, sizin masanız ${mine}`, `Hall plan, your table is ${mine}`)}>
         <rect x={w * 0.18} y="8" width={w * 0.64} height="26" rx="13" className="tmap__stage" />
-        <text x={w / 2} y="25" className="tmap__stagetext">SAHNE · DANS PİSTİ</text>
+        <text x={w / 2} y="25" className="tmap__stagetext">{t('SAHNE · DANS PİSTİ', 'STAGE · DANCE FLOOR')}</text>
         {list.map((name, i) => {
           const cx = (i % cols) * cell + cell / 2
           const cy = Math.floor(i / cols) * cell + cell / 2 + 50
@@ -29,7 +31,7 @@ export default function TableMap({ tables, mine }) {
           )
         })}
       </svg>
-      <figcaption>Masanız salonda parlayan masa: <b>Masa {mine}</b></figcaption>
+      <figcaption>{t('Masanız salonda parlayan masa:', 'Your table is the glowing one:')} <b>{t('Masa', 'Table')} {mine}</b></figcaption>
     </figure>
   )
 }

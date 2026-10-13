@@ -190,6 +190,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             </Group>
             <Group title="Metinler">
               <Field label="Davet metni" textarea value={site.inviteText} onChange={(v) => set({ inviteText: v })} />
+              <En><Field label="Davet metni (İngilizce)" textarea value={site.inviteTextEn || ''} onChange={(v) => set({ inviteTextEn: v })} /></En>
               <Field label="Etiket (hashtag)" value={site.hashtag} onChange={(v) => set({ hashtag: v })} />
               <Field label="Katılım bildirimi son tarihi" value={site.rsvpDeadline} onChange={(v) => set({ rsvpDeadline: v })}
                 hint='Ör. "1 Kasım". Boş bırakılırsa tarih yazılmaz.' />
@@ -251,6 +252,10 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
               <>
                 <Field label="Başlık" value={item.title} onChange={(v) => update({ title: v })} />
                 <Field label="Açıklama" textarea value={item.text} onChange={(v) => update({ text: v })} />
+                <En>
+                  <Field label="Başlık (İngilizce)" value={item.titleEn || ''} onChange={(v) => update({ titleEn: v })} />
+                  <Field label="Açıklama (İngilizce)" textarea value={item.textEn || ''} onChange={(v) => update({ textEn: v })} />
+                </En>
                 <PhotoField value={item.photo} adminKey={adminKey} notify={notify} onChange={(url) => update({ photo: url })} />
               </>
             )} />
@@ -267,6 +272,10 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
                   <Field label="Başlık" value={item.title} onChange={(v) => update({ title: v })} />
                 </div>
                 <Field label="Not" value={item.note} onChange={(v) => update({ note: v })} />
+                <En>
+                  <Field label="Başlık (İngilizce)" value={item.titleEn || ''} onChange={(v) => update({ titleEn: v })} />
+                  <Field label="Not (İngilizce)" value={item.noteEn || ''} onChange={(v) => update({ noteEn: v })} />
+                </En>
               </>
             )} />
         )}
@@ -279,6 +288,10 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
               <>
                 <Field label="Soru" value={item.q} onChange={(v) => update({ q: v })} />
                 <Field label="Cevap" textarea value={item.a} onChange={(v) => update({ a: v })} />
+                <En>
+                  <Field label="Soru (İngilizce)" value={item.qEn || ''} onChange={(v) => update({ qEn: v })} />
+                  <Field label="Cevap (İngilizce)" textarea value={item.aEn || ''} onChange={(v) => update({ aEn: v })} />
+                </En>
               </>
             )} />
         )}
@@ -383,6 +396,16 @@ const hasCustom = (site) => Object.keys(site.customTheme || {}).length > 0
 
 function formatIban(v) {
   return v.toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/(.{4})/g, '$1 ').trim()
+}
+
+// İngilizce alanlar: yabancı misafirler için isteğe bağlı, boşsa Türkçesi görünür
+function En({ children }) {
+  return (
+    <details className="aen">
+      <summary>🇬🇧 İngilizce <small>(isteğe bağlı)</small></summary>
+      {children}
+    </details>
+  )
 }
 
 function Group({ title, hint, children }) {
