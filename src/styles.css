@@ -2096,3 +2096,32 @@ a { color: inherit; }
 .lb__stage video { max-width: 100%; max-height: 100%; border-radius: 10px; background: #000; }
 .screen__vid { animation: none; }
 .ap-crash { position: fixed; inset: 0; z-index: 150; display: grid; place-content: center; gap: 14px; padding: 24px; background: #f5f2ef; text-align: center; font-family: var(--sans); }
+
+/* ---------- okunabilirlik: küçük yazılarda daha koyu tonlar (WCAG AA) ---------- */
+:root {
+  --stone: color-mix(in srgb, var(--ink) 80%, transparent);
+  --gold-ink: color-mix(in srgb, var(--champagne) 62%, var(--ink));
+}
+.kicker, .chapter__no, .cal__wd, .countdown__label, .ticket__label, .rsvp__field > span, .rsvp__count > span,
+.weather__label, .share__label, .memories__tag, .wish figcaption, .schedule__now + h3, .tmap__stagetext, .chapter__cta,
+.story__dots + *, .gold .kicker { color: var(--gold-ink); }
+.tmap__stagetext { fill: var(--gold-ink); }
+.outro__admin { color: color-mix(in srgb, var(--ink) 78%, var(--paper)); }
+.dock__gold { background: var(--gold-ink) !important; }
+
+/* ---------- panel: nasıl kullanılır ---------- */
+.ap__help { display: flex; align-items: center; gap: 12px; width: 100%; margin: 0 0 18px; padding: 14px 16px; border: 0; border-radius: 18px; background: linear-gradient(120deg, #2b2426, #4a3a30); color: #fff; text-align: left; box-shadow: 0 14px 30px -18px rgba(0, 0, 0, .6); }
+.ap__help > span:first-child { font-size: 26px; }
+.ap__help b { display: block; font-size: 15px; }
+.ap__help small { display: block; font-size: 12px; opacity: .75; }
+.ap__help em { margin-left: auto; font-style: normal; font-size: 24px; opacity: .7; }
+.guide__head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.guide__no { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: #1d1a1a; color: #fff; font-weight: 800; }
+.guide__head b { display: block; font-size: 16px; }
+.guide__head small { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #a3865a; }
+.guide__step ol { margin: 0 0 10px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+.guide__step li { margin-bottom: 6px; }
+.guide__go { padding: 2px 8px; border: 0; border-radius: 999px; background: #e8f0fb; color: #2557a7; font-size: 12px; font-weight: 700; }
+.guide__tip { margin: 0; padding: 10px 12px; border-radius: 12px; background: #faf6f1; font-size: 13px; line-height: 1.55; color: #5a4e48; }
+.guide__notes { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.7; }
+@media (min-width: 900px) { .ap__help { margin-top: 4px; } }

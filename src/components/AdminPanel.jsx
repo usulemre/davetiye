@@ -3,7 +3,7 @@ import { THEMES, themeColors } from '../site'
 import { shrink, uploadBlob } from '../images'
 import { changeCredentials } from '../admin'
 import { useGuests, GuestList, Tables, Gate, QrCodes, Songs } from './GuestAdmin'
-import { Overview } from './AdminExtras'
+import { Overview, Guide } from './AdminExtras'
 import { statusOf } from '../guests'
 
 // Panel menüsü: gruplar ve her bölümün simgesi, kısa açıklaması
@@ -30,13 +30,14 @@ const MENU = [
     ['bolum', 'Bölümler', '🧩', 'Göster ya da gizle'],
   ]],
   ['Araçlar', [
+    ['yardim', 'Nasıl kullanılır?', '📘', 'Adım adım düğün takvimi'],
     ['qr', 'QR & dev ekran', '📱', 'QR kodlar, düğün gecesi ekranı'],
     ['hesap', 'Hesap', '🔐', 'Kullanıcı adı ve şifre'],
   ]],
 ]
 const ITEMS = MENU.flatMap(([, items]) => items)
 // Bu bölümlerdeki değişiklikler anında kaydedilir (Kaydet butonu gerekmez)
-const LIVE = ['ozet', 'davetli', 'masa', 'kapi', 'sarki', 'qr', 'hesap']
+const LIVE = ['yardim', 'ozet', 'davetli', 'masa', 'kapi', 'sarki', 'qr', 'hesap']
 const wide = () => window.matchMedia('(min-width: 900px)').matches
 const EVENT_TYPES = ['Düğün', 'Nişan', 'Kına', 'Söz', 'Nikâh']
 const COLOR_FIELDS = [
@@ -115,6 +116,13 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             </div>
           )}
         </header>
+        {tab !== 'yardim' && (
+          <button type="button" className="ap__help" onClick={() => open('yardim')}>
+            <span aria-hidden="true">📘</span>
+            <span><b>Nasıl kullanılır?</b><small>Adım adım: davetten düğün gününe</small></span>
+            <em aria-hidden="true">›</em>
+          </button>
+        )}
         {MENU.map(([group, items]) => (
           <section key={group} className="ap__group">
             <h3>{group}</h3>
@@ -138,7 +146,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             {!isWide && <button type="button" className="ap__back" onClick={() => setTab(null)}>‹ Menü</button>}
             <div className="ap__title">
               <strong><span aria-hidden="true">{current[2]}</span> {current[1]}</strong>
-              <span>{LIVE.includes(tab) ? 'Değişiklikler anında kaydedilir ✓' : 'Değişiklikleri bitirince alttan Kaydet\'e bas'}</span>
+              <span>{tab === 'yardim' ? 'Davetten düğün gününe adım adım' : LIVE.includes(tab) ? 'Değişiklikler anında kaydedilir ✓' : 'Değişiklikleri bitirince alttan Kaydet\'e bas'}</span>
             </div>
             <div className="ap__actions">
               <button type="button" className="ap__icon" onClick={() => setMin(true)} title="Siteyi gör" aria-label="Siteyi gör">👁</button>
@@ -148,6 +156,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
         )}
       <div className="ap__body" ref={body}>
         <div className="ap__content">
+        {tab === 'yardim' && <Guide onOpen={open} />}
         {tab === 'ozet' && <Overview store={guests} site={site} onOpen={open} adminKey={adminKey} />}
         {tab === 'davetli' && <GuestList store={guests} site={site} notify={notify} />}
         {tab === 'masa' && <Tables store={guests} notify={notify} site={site} />}

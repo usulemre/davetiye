@@ -247,3 +247,72 @@ function PrintSheet({ mode, list, site }) {
     </div>
   )
 }
+
+// ---------- Nasıl kullanılır: düğün takvimine göre adım adım ----------
+const GUIDE = [
+  ['🪄', 'İlk iş: davetiyeyi hazırla', 'Şimdi', [
+    ['İsimler, tarih ve saat doğru mu kontrol et.', 'genel'],
+    ['Kapak ve kapanış fotoğraflarını seç.', 'foto'],
+    ['Hikâye kartlarını, programı ve mekânı düzenle.', 'hikaye'],
+    ['Altın köşesine gerçek IBAN ve banka adını yaz.', 'altin'],
+    ['Sıkça sorulanlardaki örnek cevapları kendinize göre değiştir.', 'sss'],
+    ['Renkleri ve müziği beğenmezsen değiştir.', 'tema'],
+    ['Yönetici şifresini güçlü bir şifreyle değiştir.', 'hesap'],
+  ], 'Değişiklik yapınca altta siyah "Kaydet" çubuğu çıkar; kaydetmeden çıkma. Sağ üstteki 👁 ile siteyi misafir gözüyle görebilirsin.'],
+  ['👥', 'Davetlileri ekle ve davet gönder', '1–2 ay önce', [
+    ['Davetlilerde "Toplu ekle"ye Excel listesini yapıştır (Ad Soyad, Telefon, Kişi sayısı).', 'davetli'],
+    ['Her davetliye taraf seç (damat / gelin); masalarda işine yarar.', 'davetli'],
+    ['"Sırayla davet gönder" ile herkese WhatsApp\'tan kişiye özel linkini gönder.', 'davetli'],
+  ], 'Kişiye özel linki açan misafir adıyla karşılanır ve tek dokunuşla "Geliyorum / Gelemiyorum" der. Cevaplar listeye kendiliğinden düşer.'],
+  ['📊', 'Cevapları takip et', 'Cevaplar gelirken', [
+    ['Özet\'te kaç kişinin geldiğini, hangi taraftan olduğunu gör.', 'ozet'],
+    ['Cevap vermeyenlere "Cevap vermeyenlere hatırlat" ile tek tek yaz.', 'davetli'],
+    ['DJ için şarkı isteklerini kopyala ya da WhatsApp\'la gönder.', 'sarki'],
+  ], 'Listeyi istediğin an "Excel olarak indir" ile bilgisayarına alabilirsin.'],
+  ['🪑', 'Masaları ve basılı işleri hazırla', '1 hafta önce', [
+    ['Masalar\'da "Otomatik oturt" de; sonra istediğin gibi düzelt.', 'masa'],
+    ['Masa kartlarını ve isim kartlarını yazdır (bilgisayardan).', 'masa'],
+    ['Anı Duvarı QR kodunu indirip masalara koy.', 'qr'],
+  ], 'Masası belli olan misafir, davetiyesindeki giriş kartında salonda masasını parlayan bir haritada görür.'],
+  ['🎉', 'Düğün günü', 'O gün', [
+    ['Kapıdaki görevli misafirin giriş kartındaki QR\'ı telefonla okutur; açılan sayfada "Girişi onayla"ya basar. (Görevlinin telefonunda yönetici girişi yapılmış olmalı.)', 'kapi'],
+    ['Salondaki projeksiyonda "Dev ekran"ı aç: misafirlerin paylaştığı fotoğraf ve dilekler döner.', 'qr'],
+  ], 'Davetiyede program "Canlı akış" olur ve o anki adım parlar. Salonda internet zayıfsa, daha önce açılmış davetiye ve giriş kartları internetsiz de açılır.'],
+  ['📦', 'Düğünden sonra', 'Ertesi gün', [
+    ['Anı Duvarı\'nda "Tüm fotoğrafları ve dilekleri indir" ile hepsini bilgisayarına al.', null],
+    ['Depolama dolmaya yakınsa Özet\'ten kontrol et.', 'ozet'],
+  ], 'Site kendiliğinden "Evlendik!" moduna geçer ve misafirlere teşekkür eder.'],
+]
+
+export function Guide({ onOpen }) {
+  return (
+    <div className="guide">
+      <p className="ahint">Siteyi baştan sona yönetmek için bu adımları sırayla izleyebilirsin. Mavi bağlantıya dokununca ilgili bölüm açılır.</p>
+      {GUIDE.map(([icon, title, when, steps, tip], i) => (
+        <section key={title} className="agroup guide__step">
+          <div className="guide__head">
+            <span className="guide__no">{i + 1}</span>
+            <div><b>{icon} {title}</b><small>{when}</small></div>
+          </div>
+          <ol>
+            {steps.map(([text, tab]) => (
+              <li key={text}>
+                {text}{tab && <> <button type="button" className="guide__go" onClick={() => onOpen(tab)}>Aç ›</button></>}
+              </li>
+            ))}
+          </ol>
+          <p className="guide__tip">💡 {tip}</p>
+        </section>
+      ))}
+      <section className="agroup">
+        <h4>Kısa notlar</h4>
+        <ul className="guide__notes">
+          <li>Yönetici girişi: sitenin en altındaki "Yönetici girişi" ya da adresin sonuna <b>/yonetici</b>.</li>
+          <li>Eski ya da yavaş bir telefonda site ağır gelirse adresin sonuna <b>?hafif</b> ekle; 3D kapanır.</li>
+          <li>Dev ekran adresi: adresin sonuna <b>?ekran</b>.</li>
+          <li>Bir misafirin cevabını sen de değiştirebilirsin: Davetliler'de ismine dokun.</li>
+        </ul>
+      </section>
+    </div>
+  )
+}
