@@ -69,5 +69,6 @@ export function cleanPhone(value) {
 export function cleanRsvp(input, seats) {
   if (!input || !['yes', 'no'].includes(input.status)) return null
   const count = input.status === 'yes' ? Math.min(seats, Math.max(1, Math.round(Number(input.count) || 1))) : 0
-  return { status: input.status, count, note: clean(input.note, 300), at: Date.now() }
+  const song = input.status === 'yes' ? clean(input.song, 120) : ''
+  return { status: input.status, count, note: clean(input.note, 300), ...(song ? { song } : {}), at: Date.now() }
 }

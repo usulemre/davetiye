@@ -10,7 +10,7 @@ export const defaults = {
   theme: 'inci',
 
   // Bölümleri gizlemek/göstermek için
-  sections: { story: true, program: true, rsvp: true, gold: true, memories: true },
+  sections: { story: true, program: true, rsvp: true, faq: true, gold: true, memories: true },
 
   // Katılım bildirimi için son tarih (ör. "1 Kasım"); boşsa yazılmaz
   rsvpDeadline: '',
@@ -23,7 +23,18 @@ export const defaults = {
     name: 'Beytepe Garden',
     address: 'Beytepe, Çankaya / Ankara',
     mapsQuery: 'Beytepe Garden, Çankaya, Ankara',
+    // hava durumu tahmini için konum
+    lat: 39.8667,
+    lon: 32.7345,
   },
+
+  // Sıkça sorulanlar (panelden düzenlenebilir)
+  faq: [
+    { q: 'Çocuklarımızı da getirebilir miyiz?', a: 'Elbette! Minik misafirlerimizi de aramızda görmekten mutluluk duyarız 🧸' },
+    { q: 'Kıyafet kuralı var mı?', a: 'Şık ve rahat olmanız yeterli. Akşam serin olabileceği için yanınıza ince bir ceket almanızı öneririz.' },
+    { q: 'Mekâna nasıl gelebilirim?', a: 'Konum bölümündeki "Yol Tarifi Al" butonuna dokunursanız telefonunuzdaki harita size yolu gösterir.' },
+    { q: 'Düğünde çektiğim fotoğrafları nasıl paylaşırım?', a: 'Anı Duvarı\'na fotoğraf ekleyebilirsiniz. Masalardaki QR kodu okutmanız yeterli; fotoğraflarınız düğün gecesi dev ekranda da görünür.' },
+  ],
 
   // Arka plan müziği: public/ klasöründeki ses dosyası
   music: '/muzik.m4a',

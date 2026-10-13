@@ -2,15 +2,15 @@ import { useRef, useState } from 'react'
 import { THEMES, themeColors } from '../site'
 import { shrink, uploadBlob } from '../images'
 import { changeCredentials } from '../admin'
-import { useGuests, GuestList, Tables, Gate, QrCodes } from './GuestAdmin'
+import { useGuests, GuestList, Tables, Gate, QrCodes, Songs } from './GuestAdmin'
 
 const TABS = [
-  ['davetli', 'Davetliler'], ['masa', 'Masalar'], ['kapi', 'Kapı girişi'], ['qr', 'QR kodlar'],
+  ['davetli', 'Davetliler'], ['masa', 'Masalar'], ['kapi', 'Kapı girişi'], ['sarki', 'Şarkı istekleri'], ['qr', 'QR & ekran'],
   ['genel', 'Genel'], ['tema', 'Renkler'], ['foto', 'Fotoğraflar'], ['hikaye', 'Hikâye'],
-  ['program', 'Program'], ['mekan', 'Mekân'], ['altin', 'Altın / IBAN'], ['muzik', 'Müzik'], ['bolum', 'Bölümler'], ['hesap', 'Hesap'],
+  ['program', 'Program'], ['sss', 'Sorular'], ['mekan', 'Mekân'], ['altin', 'Altın / IBAN'], ['muzik', 'Müzik'], ['bolum', 'Bölümler'], ['hesap', 'Hesap'],
 ]
 // Bu sekmelerdeki değişiklikler anında kaydedilir (Kaydet butonu gerekmez)
-const LIVE = ['davetli', 'masa', 'kapi', 'qr']
+const LIVE = ['davetli', 'masa', 'kapi', 'sarki', 'qr']
 const EVENT_TYPES = ['Düğün', 'Nişan', 'Kına', 'Söz', 'Nikâh']
 const COLOR_FIELDS = [
   ['ink', 'Ana renk (koyu)'], ['paper', 'Arka plan'], ['ivory', 'İkincil arka plan'],
@@ -73,6 +73,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
         {tab === 'davetli' && <GuestList store={guests} site={site} notify={notify} />}
         {tab === 'masa' && <Tables store={guests} notify={notify} />}
         {tab === 'kapi' && <Gate store={guests} />}
+        {tab === 'sarki' && <Songs store={guests} notify={notify} />}
         {tab === 'qr' && <QrCodes />}
         {tab === 'genel' && (
           <>
@@ -182,6 +183,18 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             )} />
         )}
 
+        {tab === 'sss' && (
+          <ListEditor items={site.faq} onChange={(faq) => set({ faq })}
+            blank={{ q: 'Yeni soru?', a: '' }}
+            addLabel="+ Soru ekle"
+            render={(item, update) => (
+              <>
+                <Field label="Soru" value={item.q} onChange={(v) => update({ q: v })} />
+                <Field label="Cevap" textarea value={item.a} onChange={(v) => update({ a: v })} />
+              </>
+            )} />
+        )}
+
         {tab === 'mekan' && (
           <Group title="Mekân">
             <Field label="Mekân adı" value={site.venue.name} onChange={(v) => setIn('venue', { name: v })} />
@@ -189,6 +202,11 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             <Field label="Haritada aranacak ifade" value={site.venue.mapsQuery}
               onChange={(v) => setIn('venue', { mapsQuery: v })}
               hint="Google Haritalar'da mekânı doğru bulan arama metni" />
+            <div className="afield-row">
+              <Field label="Enlem" value={String(site.venue.lat ?? '')} onChange={(v) => setIn('venue', { lat: v.replace(',', '.') })} />
+              <Field label="Boylam" value={String(site.venue.lon ?? '')} onChange={(v) => setIn('venue', { lon: v.replace(',', '.') })} />
+            </div>
+            <p className="ahint">Enlem/boylam, düğüne 15 gün kala gösterilen hava tahmini içindir. Google Haritalar'da mekâna basılı tutunca görünen sayılar.</p>
           </Group>
         )}
 
@@ -211,7 +229,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
 
         {tab === 'bolum' && (
           <Group title="Görünen bölümler">
-            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['rsvp', 'Katılım bildirimi (LCV)'], ['gold', 'Altın köşesi / IBAN'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
+            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['rsvp', 'Katılım bildirimi (LCV)'], ['faq', 'Sıkça sorulanlar'], ['gold', 'Altın köşesi / IBAN'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
               <label key={k} className="atoggle">
                 <input type="checkbox" checked={site.sections[k] !== false}
                   onChange={(e) => setIn('sections', { [k]: e.target.checked })} />

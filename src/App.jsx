@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { copyText } from './hooks'
 import { SiteContext, mergeSite, applyTheme } from './site'
 import { useScrollFx, useScroll3D } from './fx'
@@ -13,9 +13,13 @@ import Memories from './components/Memories'
 import AdminPanel from './components/AdminPanel'
 import Login from './components/Login'
 import Rsvp from './components/Rsvp'
+import Faq from './components/Faq'
 import GateBar from './components/GateBar'
 import { myCode, linkCode, fetchGuest } from './guests'
 import { Invite, When, Program, Venue, Outro } from './components/Sections'
+
+const Screen = lazy(() => import('./components/Screen'))
+const isScreen = new URLSearchParams(window.location.search).has('ekran')
 
 // Kaydedilecek veriden türetilmiş alanları çıkar
 const toSaved = ({ initials, ...rest }) => rest
@@ -122,6 +126,15 @@ export default function App() {
 
   const show = site.sections
 
+  // Düğün gecesi projeksiyon ekranı
+  if (isScreen) {
+    return (
+      <SiteContext.Provider value={site}>
+        <Suspense fallback={<div className="boot" />}><Screen /></Suspense>
+      </SiteContext.Provider>
+    )
+  }
+
   return (
     <SiteContext.Provider value={site}>
       <Intro guestName={guest?.name} onOpen={(fromTap) => { setOpened(true); if (fromTap) music.current?.play() }} />
@@ -138,6 +151,7 @@ export default function App() {
           <Venue onCopy={handleCopy} />
         </div>
         {show.rsvp !== false && <Rsvp guest={guest} onGuest={setGuest} notify={notify} />}
+        {show.faq !== false && <Faq />}
         {show.gold !== false && <Gold onCopy={handleCopy} />}
         {show.memories !== false && <Memories notify={notify} admin={admin} />}
         <Outro onCopy={handleCopy} notify={notify} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />

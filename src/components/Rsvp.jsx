@@ -14,6 +14,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
   const [count, setCount] = useState(guest?.rsvp?.count || 1)
   const [name, setName] = useState('')
   const [note, setNote] = useState(guest?.rsvp?.note || '')
+  const [song, setSong] = useState(guest?.rsvp?.song || '')
   const [busy, setBusy] = useState(false)
   const [burst, setBurst] = useState(0)
   const max = guest?.seats || 10
@@ -24,6 +25,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
     setStatus(guest?.rsvp?.status || '')
     setCount(guest?.rsvp?.count || Math.min(guest?.seats || 1, 2))
     setNote(guest?.rsvp?.note || '')
+    setSong(guest?.rsvp?.song || '')
   }, [guest?.id])
 
   const submit = async (e) => {
@@ -31,7 +33,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
     if (!status) return notify('Lütfen gelip gelemeyeceğinizi seçin')
     setBusy(true)
     try {
-      const next = await sendRsvp({ g: guest?.id, name, status, count, note })
+      const next = await sendRsvp({ g: guest?.id, name, status, count, note, song })
       rememberCode(next.id)
       onGuest(next)
       setEditing(false)
@@ -65,6 +67,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
           <p className="rsvp__sub">
             {yes ? `${guest.rsvp.count} kişi olarak katılacağınızı bildirdiniz.` : 'Katılamayacağınızı bildirdiniz. Dualarınız yeter.'}
           </p>
+          {yes && guest.rsvp.song && <p className="rsvp__songdone">🎵 Şarkı isteğiniz DJ'e iletildi: <b>{guest.rsvp.song}</b></p>}
 
           {yes && (
             <div className="ticket">
@@ -116,6 +119,14 @@ export default function Rsvp({ guest, onGuest, notify }) {
               </div>
               {guest && guest.seats > 1 && <small>Davetiniz {guest.seats} kişiliktir</small>}
             </div>
+          )}
+
+          {status === 'yes' && (
+            <label className="rsvp__field rsvp__song">
+              <span>🎵 DJ'e şarkı isteğin <i>(isteğe bağlı)</i></span>
+              <input value={song} onChange={(e) => setSong(e.target.value)} maxLength={120}
+                placeholder="Ör. Tarkan – Kuzu Kuzu" />
+            </label>
           )}
 
           <label className="rsvp__field">

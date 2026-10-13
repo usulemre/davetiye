@@ -78,10 +78,10 @@ function whatsappText(site, g, reminder) {
 const waUrl = (phone, text) => `https://wa.me/${phone || ''}?text=${encodeURIComponent(text)}`
 
 function downloadCsv(guests) {
-  const head = ['Ad Soyad', 'Telefon', 'Taraf', 'Davet (kişi)', 'Durum', 'Gelecek kişi', 'Masa', 'Not', 'Giriş', 'Kişiye özel link']
+  const head = ['Ad Soyad', 'Telefon', 'Taraf', 'Davet (kişi)', 'Durum', 'Gelecek kişi', 'Masa', 'Not', 'Şarkı isteği', 'Giriş', 'Kişiye özel link']
   const rows = guests.map((g) => [
     g.name, g.phone, SIDES.find(([k]) => k === g.side)?.[1] || '', g.seats, STATUS[statusOf(g)],
-    g.rsvp?.count ?? '', g.table, g.rsvp?.note || '', g.checkedIn ? clock(g.checkedIn) : '', guestLink(g.id),
+    g.rsvp?.count ?? '', g.table, g.rsvp?.note || '', g.rsvp?.song || '', g.checkedIn ? clock(g.checkedIn) : '', guestLink(g.id),
   ])
   const csv = [head, ...rows].map((r) => r.map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\r\n')
   const a = document.createElement('a')
@@ -159,6 +159,7 @@ export function GuestList({ store, site, notify }) {
               </span>
               <StatusChip g={g} />
               {g.rsvp?.note && <span className="gitem__note">“{g.rsvp.note}”</span>}
+              {g.rsvp?.song && <span className="gitem__note">🎵 {g.rsvp.song}</span>}
             </button>
             <div className="gitem__acts">
               <a className="gbtn gbtn--wa" target="_blank" rel="noreferrer"
@@ -245,7 +246,7 @@ function AddGuest({ store, notify, bulk, setBulk, onClose }) {
 function EditGuest({ g, store, onDone }) {
   const [d, setD] = useState({ name: g.name, phone: g.phone, seats: g.seats, table: g.table, side: g.side })
   const save = async () => { if (await store.update({ id: g.id, ...d }, 'Kaydedildi ✓')) onDone() }
-  const setRsvp = (status) => store.update({ id: g.id, rsvp: status ? { status, count: g.rsvp?.count || g.seats, note: g.rsvp?.note } : null }, 'Durum güncellendi ✓')
+  const setRsvp = (status) => store.update({ id: g.id, rsvp: status ? { status, count: g.rsvp?.count || g.seats, note: g.rsvp?.note, song: g.rsvp?.song } : null }, 'Durum güncellendi ✓')
   return (
     <div className="gedit">
       <div className="afield-row">
@@ -574,6 +575,35 @@ export function Gate({ store }) {
 }
 
 // ---------- QR kodlar ----------
+// DJ'e iletilecek şarkı istekleri
+export function Songs({ store, notify }) {
+  const { guests } = store
+  if (!guests) return <p className="ahint">Yükleniyor…</p>
+  const list = guests.filter((g) => g.rsvp?.status === 'yes' && g.rsvp.song).sort((a, b) => (a.rsvp.at || 0) - (b.rsvp.at || 0))
+  if (!list.length) return <p className="ahint">Henüz şarkı isteği yok. Misafirler "Geliyorum" derken DJ'e şarkı isteyebiliyor.</p>
+  const text = list.map((g, i) => `${i + 1}. ${g.rsvp.song} (${g.name})`).join('\n')
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); notify('Liste kopyalandı, DJ\'e gönderebilirsin 🎵') } catch { notify('Kopyalanamadı') }
+  }
+  return (
+    <>
+      <div className="songs__bar">
+        <p className="ahint">{list.length} şarkı isteği</p>
+        <button type="button" className="abtn" onClick={copy}>Listeyi kopyala</button>
+        <a className="abtn abtn--ghost" href={`https://wa.me/?text=${encodeURIComponent(`Düğün şarkı istekleri 🎵\n${text}`)}`} target="_blank" rel="noreferrer">WhatsApp'la gönder</a>
+      </div>
+      <ol className="songs">
+        {list.map((g) => (
+          <li key={g.id}>
+            <strong>{g.rsvp.song}</strong>
+            <span>{g.name}</span>
+          </li>
+        ))}
+      </ol>
+    </>
+  )
+}
+
 export function QrCodes() {
   const origin = window.location.origin
   const codes = [
@@ -581,8 +611,14 @@ export function QrCodes() {
     ['Davetiye', 'Basılı davetiyeye ya da karşılama panosuna koyabilirsiniz', `${origin}/`, 'davetiye-qr.png'],
     ['Katılım bildirimi', 'Okutan misafir doğrudan katılım formuna gelir', `${origin}/#lcv`, 'katilim-qr.png'],
   ]
+  const screen = `${origin}/?ekran`
   return (
     <>
+      <section className="agroup gscreen">
+        <h4>Düğün gecesi dev ekran</h4>
+        <p className="ahint">Salondaki projeksiyona ya da TV'ye bağlı bilgisayarda aç. Misafirlerin Anı Duvarı'na eklediği fotoğraflar slayt olarak döner, yeni gelenler otomatik eklenir. Yanında "fotoğrafını ekle" QR kodu durur.</p>
+        <a className="abtn" href={screen} target="_blank" rel="noreferrer">Ekran modunu aç ↗</a>
+      </section>
       <p className="ahint">Kodları indirip yazdırabilirsin. Telefon kamerasıyla okutunca ilgili sayfa açılır.</p>
       {codes.map(([title, hint, url, file]) => (
         <section key={url} className="agroup gqr">

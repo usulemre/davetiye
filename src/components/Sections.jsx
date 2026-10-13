@@ -5,6 +5,7 @@ import Section from './Section'
 import { SplitText, Particles, Floral } from '../fx'
 import { useNow, phaseOf, currentStep } from '../live'
 import { makeStoryImage } from '../story'
+import Weather from './Weather'
 import { useState } from 'react'
 
 const calendarEvent = (config) => ({
@@ -81,6 +82,7 @@ export function When() {
       <h2 className="heading">Büyük <em>gün</em></h2>
       <Calendar d={d} />
       <p className="when__line">{d.weekday} · Saat {d.time}</p>
+      {phase !== 'after' && <Weather config={config} />}
 
       {phase === 'after' ? (
         <div className="when__after">
