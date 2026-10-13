@@ -11,7 +11,7 @@ export async function downloadAllPhotos(posts, onProgress) {
     try {
       const res = await fetch(p.url)
       const buf = new Uint8Array(await res.arrayBuffer())
-      const ext = (p.url.split('?')[0].match(/\.(jpe?g|png|webp|heic|gif)$/i)?.[1] || 'jpg').toLowerCase()
+      const ext = (p.url.split('?')[0].match(/\.(jpe?g|png|webp|heic|gif|mp4|mov|webm)$/i)?.[1] || 'jpg').toLowerCase()
       const name = `${String(i + 1).padStart(3, '0')}-${safe(p.name)}.${ext}`
       files[name] = [buf, { level: 0 }]
       const date = new Date(p.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })

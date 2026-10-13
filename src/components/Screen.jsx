@@ -54,16 +54,18 @@ export default function Screen() {
 
   useEffect(() => {
     if (!posts?.length && !wishes.length) return undefined
+    const cur = posts?.length ? posts[index % posts.length] : null
     const id = setTimeout(() => {
       setFresh(null)
       setIndex((i) => i + 1)
-    }, SLIDE)
+    }, cur?.type === 'video' && index % 3 !== 2 ? SLIDE * 2.5 : SLIDE)
     return () => clearTimeout(id)
   }, [index, posts, wishes.length])
 
   // Sıradaki fotoğrafı önceden yükle
   useEffect(() => {
-    if (posts?.length > 1) new Image().src = posts[(index + 1) % posts.length].url
+    const nextPost = posts?.length > 1 ? posts[(index + 1) % posts.length] : null
+    if (nextPost && nextPost.type !== 'video') new Image().src = nextPost.url
   }, [index, posts])
 
   const goFull = () => {
@@ -86,8 +88,10 @@ export default function Screen() {
           </figure>
         ) : post ? (
           <figure key={post.id} className="screen__slide">
-            <img className="screen__blur" src={post.url} alt="" aria-hidden="true" />
-            <img className="screen__img" src={post.url} alt={post.caption || `${post.name} paylaştı`} />
+            {(post.type !== 'video' || post.poster) && <img className="screen__blur" src={post.type === 'video' ? post.poster : post.url} alt="" aria-hidden="true" />}
+            {post.type === 'video'
+              ? <video className="screen__img screen__vid" src={post.url} autoPlay muted loop playsInline />
+              : <img className="screen__img" src={post.url} alt={post.caption || `${post.name} paylaştı`} />}
             <figcaption className="screen__cap">
               {fresh === post.id && <span className="screen__new">Yeni ✨</span>}
               <strong>{post.name}</strong>

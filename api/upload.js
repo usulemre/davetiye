@@ -2,6 +2,7 @@ import { handleUpload } from '@vercel/blob/client'
 import { rateLimit, isAdminToken } from './_lib.js'
 
 const IMAGES = ['image/jpeg', 'image/png', 'image/webp']
+const VIDEOS = ['video/mp4', 'video/quicktime', 'video/webm']
 const AUDIO = ['audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/m4a']
 
 async function adminFromPayload(payload) {
@@ -26,9 +27,11 @@ export default async function handler(req, res) {
         if (!(await rateLimit(req, 'upload', 30, 3600))) {
           throw new Error('Çok fazla fotoğraf yüklendi, biraz sonra tekrar deneyin.')
         }
+        // Misafir: fotoğraf (15 MB) ya da kısa video (60 MB)
+        const video = /\.(mp4|mov|webm)$/i.test(pathname)
         return {
-          allowedContentTypes: IMAGES,
-          maximumSizeInBytes: 15 * 1024 * 1024,
+          allowedContentTypes: video ? VIDEOS : IMAGES,
+          maximumSizeInBytes: (video ? 60 : 15) * 1024 * 1024,
           addRandomSuffix: true,
         }
       },

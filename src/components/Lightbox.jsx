@@ -40,8 +40,12 @@ export default function Lightbox({ posts, index, onClose, onIndex }) {
       {index > 0 && <button type="button" className="lb__nav lb__nav--l" onClick={() => go(-1)} aria-label="Önceki">‹</button>}
       {index < posts.length - 1 && <button type="button" className="lb__nav lb__nav--r" onClick={() => go(1)} aria-label="Sonraki">›</button>}
       <div className="lb__stage" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
-        <img key={post.id} src={post.url} alt={post.caption || ''} draggable="false"
-          style={{ transform: `translateX(${dx}px) rotate(${dx / 40}deg)`, transition: start.current == null ? 'transform .3s ease' : 'none' }} />
+        {post.type === 'video' ? (
+          <video key={post.id} src={post.url} poster={post.poster || undefined} controls autoPlay playsInline />
+        ) : (
+          <img key={post.id} src={post.url} alt={post.caption || ''} draggable="false"
+            style={{ transform: `translateX(${dx}px) rotate(${dx / 40}deg)`, transition: start.current == null ? 'transform .3s ease' : 'none' }} />
+        )}
       </div>
       <div className="lb__cap">
         <strong>{post.name}</strong>

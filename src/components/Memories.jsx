@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Section from './Section'
 import Lightbox from './Lightbox'
 import { useSite } from '../site'
-import { shrink, uploadBlob } from '../images'
+import { shrink, uploadBlob, videoInfo } from '../images'
 
 const NAME_KEY = 'davetiye:name'
 const LIKES_KEY = 'davetiye:likes'
@@ -180,7 +180,9 @@ function Composer({ name, onName, onPosted, notify }) {
   const pick = (e) => {
     const f = e.target.files?.[0]
     if (!f) return
-    if (!f.type.startsWith('image/')) return notify('Sadece fotoğraf yükleyebilirsiniz')
+    const isVideo = f.type.startsWith('video/')
+    if (!isVideo && !f.type.startsWith('image/')) return notify('Fotoğraf ya da video seçebilirsin')
+    if (isVideo && f.size > 60 * 1024 * 1024) return notify('Video en fazla 60 MB olabilir. Biraz kısaltıp tekrar dene 🙏')
     setFile(f)
     setPreview(URL.createObjectURL(f))
     if (!name.trim()) setTimeout(() => nameInput.current?.focus(), 50)
@@ -203,9 +205,22 @@ function Composer({ name, onName, onPosted, notify }) {
     }
     setBusy(true)
     try {
-      const { blob, width, height } = await shrink(file)
-      const url = await uploadBlob('anilar', blob, { onProgress: setProgress })
-      const body = { url, name, caption, width, height }
+      let body
+      if (file.type.startsWith('video/')) {
+        const info = await videoInfo(file).catch(() => null)
+        if (info && info.duration > 61) {
+          const err = new Error('Video en fazla 1 dakika olabilir. Kısaltıp tekrar dene 🙏')
+          err.step = 'video'
+          throw err
+        }
+        const poster = info?.poster ? await uploadBlob('anilar', info.poster).catch(() => '') : ''
+        const url = await uploadBlob('anilar', file, { onProgress: setProgress })
+        body = { url, name, caption, type: 'video', poster, width: info?.width || 0, height: info?.height || 0 }
+      } else {
+        const { blob, width, height } = await shrink(file)
+        const url = await uploadBlob('anilar', blob, { onProgress: setProgress })
+        body = { url, name, caption, width, height }
+      }
       const { id } = await api('/api/posts', { method: 'POST', body: JSON.stringify(body) })
       onPosted({ ...body, id, likes: 0, comments: [], createdAt: Date.now() })
       notify('Paylaşıldı! 🎉')
@@ -220,17 +235,19 @@ function Composer({ name, onName, onPosted, notify }) {
 
   return (
     <form className="composer" onSubmit={submit}>
-      <input ref={input} type="file" accept="image/*" hidden onChange={pick} />
+      <input ref={input} type="file" accept="image/*,video/*" hidden onChange={pick} />
       {preview ? (
         <div className="composer__preview">
-          <img src={preview} alt="Seçilen fotoğraf" />
+          {file?.type.startsWith('video/')
+            ? <video src={preview} muted playsInline controls />
+            : <img src={preview} alt="Seçilen fotoğraf" />}
           {!busy && <button type="button" className="composer__remove" onClick={reset} aria-label="Fotoğrafı kaldır">×</button>}
           {busy && <div className="composer__progress"><span style={{ width: `${progress}%` }} /></div>}
         </div>
       ) : (
         <button type="button" className="composer__drop" onClick={() => input.current?.click()}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5Z M12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg>
-          <span>Fotoğraf ekle</span>
+          <span>Fotoğraf ya da video ekle</span>
         </button>
       )}
       <div className="composer__fields">
@@ -240,7 +257,7 @@ function Composer({ name, onName, onPosted, notify }) {
           onChange={(e) => setCaption(e.target.value)} />
       </div>
       <button className="btn btn--solid composer__submit" type="submit" disabled={busy}>
-        {busy ? `Yükleniyor… %${Math.round(progress)}` : file ? 'Paylaş →' : 'Fotoğraf seç'}
+        {busy ? `Yükleniyor… %${Math.round(progress)}` : file ? 'Paylaş →' : 'Fotoğraf / video seç'}
       </button>
     </form>
   )
@@ -303,10 +320,16 @@ function PostCard({ post, onOpen, liked, name, onName, admin, notify, onLike, on
         {admin && <button type="button" className="post__delete" onClick={onDelete}>Sil</button>}
       </header>
 
+      {post.type === 'video' ? (
+        <div className="post__media post__media--video" style={{ aspectRatio: ratio }}>
+          <video src={post.url} poster={post.poster || undefined} controls playsInline preload="none" />
+        </div>
+      ) : (
       <div className="post__media" style={{ aspectRatio: ratio }} onClick={onImageTap}>
         <img src={post.url} alt={post.caption || `${post.name} paylaşımı`} loading="lazy" />
         {burst && <span className="post__burst">♥</span>}
       </div>
+      )}
 
       <div className="post__actions">
         <button type="button" className={`post__like ${liked ? 'is-liked' : ''}`} onClick={onLike}

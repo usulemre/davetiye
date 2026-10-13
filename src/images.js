@@ -49,7 +49,9 @@ export async function uploadBlob(folder, blob, { adminKey, onProgress } = {}) {
   const { upload } = await import('@vercel/blob/client')
   const type = blob.type || 'image/jpeg'
   const sub = type.split('/')[1] || 'bin'
-  const ext = sub === 'jpeg' ? 'jpg' : sub === 'mpeg' ? 'mp3' : sub === 'x-m4a' || sub === 'mp4' ? 'm4a' : sub
+  const ext = type.startsWith('video/')
+    ? (sub === 'quicktime' ? 'mov' : sub)
+    : sub === 'jpeg' ? 'jpg' : sub === 'mpeg' ? 'mp3' : sub === 'x-m4a' || sub === 'mp4' ? 'm4a' : sub
   const result = await upload(`${folder}/${Date.now()}.${ext}`, blob, {
     access: 'public',
     handleUploadUrl: '/api/upload',
@@ -58,4 +60,30 @@ export async function uploadBlob(folder, blob, { adminKey, onProgress } = {}) {
     onUploadProgress: onProgress ? ({ percentage }) => onProgress(percentage) : undefined,
   })
   return result.url
+}
+
+// Videonun süresini, boyutunu ve kapak karesini çıkar
+export function videoInfo(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const v = document.createElement('video')
+    v.muted = true
+    v.playsInline = true
+    v.preload = 'auto'
+    v.src = url
+    const fail = () => { URL.revokeObjectURL(url); reject(new Error('Bu video açılamadı')) }
+    v.onerror = fail
+    v.onloadedmetadata = () => { v.currentTime = Math.min(0.6, (v.duration || 1) / 2) }
+    v.onseeked = () => {
+      const scale = Math.min(1, 1000 / Math.max(v.videoWidth, v.videoHeight))
+      const c = document.createElement('canvas')
+      c.width = Math.round(v.videoWidth * scale)
+      c.height = Math.round(v.videoHeight * scale)
+      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height)
+      c.toBlob((poster) => {
+        URL.revokeObjectURL(url)
+        resolve({ duration: v.duration, width: v.videoWidth, height: v.videoHeight, poster })
+      }, 'image/jpeg', 0.8)
+    }
+  })
 }
