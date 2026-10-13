@@ -140,7 +140,7 @@ export default function App() {
         {show.rsvp !== false && <Rsvp guest={guest} onGuest={setGuest} notify={notify} />}
         {show.gold !== false && <Gold onCopy={handleCopy} />}
         {show.memories !== false && <Memories notify={notify} admin={admin} />}
-        <Outro onCopy={handleCopy} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
+        <Outro onCopy={handleCopy} notify={notify} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>
       <nav className={`dock ${docked && !editing ? 'dock--show' : ''}`}>
         {show.rsvp !== false && <a href="#lcv" className="dock__rsvp">Katılım</a>}

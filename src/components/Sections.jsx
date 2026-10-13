@@ -3,6 +3,9 @@ import { formatDate, googleCalendarUrl, downloadICS } from '../date'
 import { useCountdown } from '../hooks'
 import Section from './Section'
 import { SplitText, Particles, Floral } from '../fx'
+import { useNow, phaseOf, currentStep } from '../live'
+import { makeStoryImage } from '../story'
+import { useState } from 'react'
 
 const calendarEvent = (config) => ({
   title: `${config.groom.first} & ${config.bride.first} · ${config.eventType}`,
@@ -70,6 +73,7 @@ export function When() {
   const event = calendarEvent(config)
   const d = formatDate(config.start)
   const c = useCountdown(config.start)
+  const phase = phaseOf(config, useNow(10000))
   const units = [['Gün', c.days], ['Saat', c.hours], ['Dakika', c.minutes], ['Saniye', c.seconds]]
   return (
     <Section id="tarih" className="when">
@@ -78,8 +82,14 @@ export function When() {
       <Calendar d={d} />
       <p className="when__line">{d.weekday} · Saat {d.time}</p>
 
-      {c.done ? (
-        <p className="when__done">Bugün o gün! 🎉 Yolda mısınız?</p>
+      {phase === 'after' ? (
+        <div className="when__after">
+          <p className="when__done">Bizimle olduğunuz için teşekkürler 🤍</p>
+          <p className="when__note">O geceden fotoğraflarınız varsa Anı Duvarı'na eklemeyi unutmayın.</p>
+          <a className="btn btn--solid" href="#anilar">Anı Duvarı'na git</a>
+        </div>
+      ) : phase === 'live' || c.done ? (
+        <p className="when__done">Düğün şu an devam ediyor! 🎉 Yolda mısınız?</p>
       ) : (
         <div className="countdown">
           {units.map(([label, value]) => (
@@ -105,15 +115,17 @@ export function When() {
 
 export function Program() {
   const config = useSite()
+  const now = currentStep(config, useNow())
   return (
     <Section id="program" className="program">
-      <p className="kicker">Akış</p>
+      <p className="kicker">{now >= 0 ? <><span className="live-dot" /> Canlı akış</> : 'Akış'}</p>
       <h2 className="heading">Günün <em>programı</em></h2>
       <ol className="schedule">
         {config.program.map((item, i) => (
-          <li key={item.time} style={{ '--i': i }}>
+          <li key={item.time} style={{ '--i': i }} className={i === now ? 'is-now' : i < now ? 'is-past' : ''}>
             <span className="schedule__time">{item.time}</span>
             <div>
+              {i === now && <span className="schedule__now">Şu an</span>}
               <h3>{item.title}</h3>
               <p>{item.note}</p>
             </div>
@@ -152,7 +164,7 @@ export function Venue({ onCopy }) {
   )
 }
 
-export function Outro({ onCopy, onAdmin, isAdmin }) {
+export function Outro({ onCopy, onAdmin, isAdmin, notify }) {
   const config = useSite()
   const url = window.location.origin
   const message = `${config.groom.first} & ${config.bride.first} evleniyor! 💍 Düğün davetiyemiz:`
@@ -166,6 +178,29 @@ export function Outro({ onCopy, onAdmin, isAdmin }) {
       }
     } else {
       onCopy(url, 'Davetiye linki kopyalandı 🔗')
+    }
+  }
+
+  const [making, setMaking] = useState(false)
+  // Hikâye görseli: telefonda paylaşım menüsü açılır, olmazsa indirilir
+  const story = async () => {
+    if (making) return
+    setMaking(true)
+    try {
+      const blob = await makeStoryImage(config)
+      const file = new File([blob], 'davetiye-hikaye.jpg', { type: 'image/jpeg' })
+      if (navigator.canShare?.({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: `${config.groom.first} & ${config.bride.first}` }) } catch { /* vazgeçildi */ }
+      } else {
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = 'davetiye-hikaye.jpg'
+        a.click()
+        setTimeout(() => URL.revokeObjectURL(a.href), 4000)
+        notify?.('Hikâye görseli indirildi 📸')
+      }
+    } finally {
+      setMaking(false)
     }
   }
 
@@ -196,6 +231,10 @@ export function Outro({ onCopy, onAdmin, isAdmin }) {
               <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
             </button>
           </div>
+          <button type="button" className="story-btn" onClick={story} disabled={making}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="1.6" /><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.6" /><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" /></svg>
+            {making ? 'Hazırlanıyor…' : 'Hikâyende paylaş'}
+          </button>
         </div>
       </div>
       {!isAdmin && (

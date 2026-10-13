@@ -1705,3 +1705,57 @@ a { color: inherit; }
 }
 .intro--3d.intro--leaving::after { opacity: 1; }
 .intro--3d.intro--leaving { transition: opacity .9s ease .4s; }
+
+/* ---------- konfeti ---------- */
+.confetti { position: fixed; inset: 0; z-index: 250; pointer-events: none; overflow: hidden; }
+.confetti__p {
+  position: absolute; top: -30px; display: grid; place-items: center; font-style: normal; line-height: 1;
+  animation: confettiFall 3s cubic-bezier(.25, .6, .4, 1) forwards;
+}
+.confetti__p--heart { color: color-mix(in srgb, var(--champagne) 60%, #e0607a); font-size: 18px; }
+.confetti__p--gold { border-radius: 2px; background: linear-gradient(135deg, color-mix(in srgb, var(--champagne-hi) 80%, #fff), var(--champagne)); }
+.confetti__p--pearl { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #f1e9f5 55%, #d8cde6); box-shadow: 0 2px 4px rgba(0, 0, 0, .1); }
+@keyframes confettiFall {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(var(--drift), 105vh) rotate(var(--spin)); opacity: 0; }
+}
+
+/* ---------- misafirin masa haritası ---------- */
+.tmap { margin: 0 0 22px; padding: 16px 14px 12px; border-radius: 22px; background: rgba(255, 255, 255, .6); border: 1px solid var(--glass-line); }
+.tmap svg { display: block; width: 100%; max-height: 300px; }
+.tmap__stage { fill: color-mix(in srgb, var(--champagne-hi) 70%, #fff); stroke: var(--champagne); stroke-width: 1; }
+.tmap__stagetext { font: 700 9px var(--sans); letter-spacing: .2em; text-anchor: middle; fill: var(--champagne); }
+.tmap__table { fill: #fff; stroke: color-mix(in srgb, var(--champagne) 45%, transparent); stroke-width: 1.2; }
+.tmap__chair { fill: color-mix(in srgb, var(--champagne-hi) 70%, #fff); }
+.tmap__num { font: 500 18px var(--serif); text-anchor: middle; fill: var(--stone); }
+.tmap__t.is-me .tmap__table { fill: var(--champagne); stroke: none; }
+.tmap__t.is-me .tmap__chair { fill: var(--champagne); }
+.tmap__t.is-me .tmap__num { fill: #fff; font-weight: 700; }
+.tmap__pulse { fill: none; stroke: var(--champagne); stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: tmapPulse 2s ease-out infinite; }
+@keyframes tmapPulse { from { transform: scale(.7); opacity: .9; } to { transform: scale(1.35); opacity: 0; } }
+.tmap figcaption { margin-top: 8px; font-size: 12.5px; color: var(--stone); }
+.tmap figcaption b { color: var(--ink); }
+
+/* ---------- düğün günü canlı mod ---------- */
+.live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e0445a; animation: live 1.6s ease-out infinite; --rose: #e0445a; }
+.program .kicker:has(.live-dot)::before, .program .kicker:has(.live-dot)::after { display: none; }
+.schedule li.is-past { opacity: .45 !important; }
+.schedule li.is-now h3 { color: var(--champagne); }
+.schedule li.is-now::before { width: 15px; height: 15px; margin: -8px 0 0 -8px; background: var(--champagne); animation: live 1.6s ease-out infinite; }
+.schedule__now { display: inline-block; margin-bottom: 4px; padding: 3px 9px; border-radius: 999px; background: var(--champagne); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.when__after { display: grid; justify-items: center; gap: 6px; margin-top: 20px; }
+.when__after .when__done { margin: 0; }
+.when__note { margin: 0 0 14px; font-size: 14px; line-height: 1.6; color: var(--stone); }
+
+/* ---------- hikâye paylaş butonu ---------- */
+.story-btn {
+  display: inline-flex; align-items: center; gap: 9px; margin-top: 6px; padding: 12px 20px;
+  border: 0; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .08em;
+  background: linear-gradient(120deg, #f5a35c, #e0457b 45%, #8a4fd0);
+  box-shadow: 0 14px 30px -14px #e0457b;
+  transition: transform .2s ease;
+}
+.story-btn svg { width: 18px; height: 18px; }
+.story-btn:active { transform: scale(.96); }
+.story-btn:disabled { opacity: .7; }

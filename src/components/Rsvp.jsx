@@ -3,6 +3,8 @@ import { useSite } from '../site'
 import { sendRsvp, rememberCode, guestLink } from '../guests'
 import Section from './Section'
 import Qr from './Qr'
+import Confetti from './Confetti'
+import TableMap from './TableMap'
 
 // Katılım bildirimi (LCV): kişiye özel linkle gelen misafir adıyla karşılanır
 export default function Rsvp({ guest, onGuest, notify }) {
@@ -13,6 +15,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
   const [name, setName] = useState('')
   const [note, setNote] = useState(guest?.rsvp?.note || '')
   const [busy, setBusy] = useState(false)
+  const [burst, setBurst] = useState(0)
   const max = guest?.seats || 10
 
   // Misafir bilgisi sonradan yüklenirse formu ona göre doldur
@@ -32,6 +35,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
       rememberCode(next.id)
       onGuest(next)
       setEditing(false)
+      if (status === 'yes') setBurst((b) => b + 1)
       notify(status === 'yes' ? 'Harika! Sizi bekliyoruz 💐' : 'Bildiriminiz alındı, teşekkürler 🤍')
     } catch (err) {
       notify(err.message)
@@ -44,6 +48,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
 
   return (
     <Section id="lcv" className="rsvp">
+      <Confetti burst={burst} />
       <p className="kicker">Lütfen bildirin</p>
       <h2 className="heading">Katılım <em>durumu</em></h2>
       <p className="rsvp__lead">
@@ -73,6 +78,7 @@ export default function Rsvp({ guest, onGuest, notify }) {
               <p className="ticket__hint">Girişte bu kodu görevliye gösterebilirsiniz</p>
             </div>
           )}
+          {yes && <TableMap tables={guest.tables} mine={guest.table} />}
 
           <button type="button" className="btn btn--line" onClick={() => setEditing(true)}>Cevabımı değiştir</button>
         </div>

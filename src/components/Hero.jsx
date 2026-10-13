@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { useSite, themeColors } from '../site'
 import { formatDate } from '../date'
 import { useTilt } from '../fx'
+import { useNow, phaseOf } from '../live'
 
 const Rings3D = lazy(() => import('./Rings3D'))
 
@@ -9,6 +10,8 @@ export default function Hero({ opened }) {
   const config = useSite()
   const d = formatDate(config.start)
   const tilt = useTilt(12)
+  const phase = phaseOf(config, useNow())
+  const kicker = { today: 'Bugün evleniyoruz!', live: 'Şu an evleniyoruz', after: 'Evlendik!' }[phase] || 'Evleniyoruz'
   return (
     <header className="hero">
       <div className="hero__stage">
@@ -18,7 +21,7 @@ export default function Hero({ opened }) {
       </div>
 
       <div className="hero__inner">
-        <p className="kicker hero__kicker">Evleniyoruz</p>
+        <p className="kicker hero__kicker">{kicker}</p>
         <h1 className="hero__names">
           <span className="hero__name">
             <span className="hero__first">{config.groom.first}</span>

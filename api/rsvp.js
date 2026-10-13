@@ -5,6 +5,17 @@ import { db, rateLimit, clean, guestId, cleanRsvp, GUESTS, MAX_GUESTS } from './
 const limit = (g) => (g.source === 'site' ? 10 : g.seats)
 const pub = (g) => ({ id: g.id, name: g.name, seats: limit(g), table: g.table, rsvp: g.rsvp, checkedIn: g.checkedIn })
 
+// Masası belli olan misafire salondaki masaların numaraları (kişi bilgisi olmadan)
+async function withTables(r, g) {
+  const out = pub(g)
+  if (!g.table) return out
+  const all = (await r.hvals(GUESTS)) || []
+  const names = new Set(all.filter((x) => x?.table && x.rsvp?.status !== 'no').map((x) => String(x.table)))
+  names.add(String(g.table))
+  out.tables = [...names].sort((a, b) => a.localeCompare(b, 'tr', { numeric: true })).slice(0, 80)
+  return out
+}
+
 export default async function handler(req, res) {
   try {
     const r = db()
@@ -14,7 +25,7 @@ export default async function handler(req, res) {
       res.setHeader('Cache-Control', 'no-store')
       if (!(await rateLimit(req, 'rsvp-get', 120, 600))) return res.status(429).json({ error: 'Çok fazla istek' })
       const g = await r.hget(GUESTS, clean(req.query?.g, 20))
-      return g ? res.status(200).json({ guest: pub(g) }) : res.status(404).json({ error: 'Davet bulunamadı' })
+      return g ? res.status(200).json({ guest: await withTables(r, g) }) : res.status(404).json({ error: 'Davet bulunamadı' })
     }
 
     // Katılım bildirimi
@@ -30,7 +41,7 @@ export default async function handler(req, res) {
         const next = { ...g, rsvp }
         if (g.source === 'site' && rsvp.count) next.seats = rsvp.count
         await r.hset(GUESTS, { [id]: next })
-        return res.status(200).json({ guest: pub(next) })
+        return res.status(200).json({ guest: await withTables(r, next) })
       }
 
       // Genel linkten gelen misafir: listeye kendisi eklenir
