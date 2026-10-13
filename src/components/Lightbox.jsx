@@ -51,7 +51,7 @@ export default function Lightbox({ posts, index, onClose, onIndex }) {
       <div className="lb__cap">
         <strong>{post.name}</strong>
         {post.caption && <p>{post.caption}</p>}
-        <span>♥ {post.likes} · 💬 {post.comments.length}</span>
+        {post.likes != null && <span>♥ {post.likes} · 💬 {post.comments.length}</span>}
       </div>
     </div>,
     document.body,

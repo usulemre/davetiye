@@ -11,7 +11,7 @@ export const defaults = {
   theme: 'inci',
 
   // Bölümleri gizlemek/göstermek için
-  sections: { story: true, program: true, rsvp: true, faq: true, gold: true, wishes: true, memories: true },
+  sections: { story: true, program: true, rsvp: true, faq: true, gold: true, wishes: true, album: true, memories: true },
 
   // Katılım bildirimi için son tarih (ör. "1 Kasım"); boşsa yazılmaz
   rsvpDeadline: '',
@@ -40,6 +40,10 @@ export const defaults = {
     { q: 'Düğünde çektiğim fotoğrafları nasıl paylaşırım?', a: 'Anı Duvarı\'na fotoğraf ekleyebilirsiniz. Masalardaki QR kodu okutmanız yeterli; fotoğraflarınız düğün gecesi dev ekranda da görünür.',
       qEn: 'How can I share my photos from the wedding?', aEn: 'Add them to the Memory Wall: just scan the QR code on your table. Your photos will also appear on the big screen that night.' },
   ],
+
+  // Albüm: boşsa hikâye fotoğrafları gösterilir
+  album: [],
+  albumMemories: false,
 
   // Arka plan müziği: public/ klasöründeki ses dosyası
   music: '/muzik.m4a',

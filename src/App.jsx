@@ -17,6 +17,7 @@ import Login from './components/Login'
 import Rsvp from './components/Rsvp'
 import Faq from './components/Faq'
 import Wishes from './components/Wishes'
+import Album from './components/Album'
 import GateBar from './components/GateBar'
 import { myCode, linkCode, fetchGuest } from './guests'
 import { Invite, When, Program, Venue, Outro } from './components/Sections'
@@ -171,6 +172,7 @@ export default function App() {
         {show.faq !== false && <Safe name="sss"><Faq /></Safe>}
         {show.gold !== false && <Safe name="altin"><Gold onCopy={handleCopy} /></Safe>}
         {show.wishes !== false && <Safe name="dilek"><Wishes notify={notify} admin={admin} /></Safe>}
+        {show.album !== false && <Safe name="album"><Album /></Safe>}
         {show.memories !== false && <Safe name="anilar"><Memories notify={notify} admin={admin} /></Safe>}
         <Outro onCopy={handleCopy} notify={notify} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>

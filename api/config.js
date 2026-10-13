@@ -20,6 +20,7 @@ function sanitize(input) {
   const out = JSON.parse(JSON.stringify(input))
   for (const k of ['heroPhoto', 'outroPhoto', 'music']) if (k in out) out[k] = safeUrl(out[k])
   if (Array.isArray(out.story)) out.story = out.story.map((s) => ({ ...s, photo: safeUrl(s.photo) }))
+  if (Array.isArray(out.album)) out.album = out.album.map((a) => ({ ...a, photo: safeUrl(a.photo) })).slice(0, 120)
   if (out.customTheme) {
     for (const [k, v] of Object.entries(out.customTheme)) if (!HEX.test(v)) delete out.customTheme[k]
   }

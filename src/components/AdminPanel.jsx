@@ -19,6 +19,7 @@ const MENU = [
     ['genel', 'İsimler & tarih', '💍', 'Gelin, damat, tarih, metinler'],
     ['foto', 'Fotoğraflar', '🖼️', 'Kapak ve kapanış'],
     ['hikaye', 'Hikâyemiz', '📖', 'Fotoğraflı hikâye kartları'],
+    ['album', 'Albüm', '📔', 'Sayfa sayfa çevrilen albüm'],
     ['program', 'Program', '🕖', 'Günün akışı'],
     ['mekan', 'Mekân', '📍', 'Adres ve konum'],
     ['altin', 'Altın / IBAN', '💰', 'Hesap bilgileri'],
@@ -261,6 +262,33 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
             )} />
         )}
 
+        {tab === 'album' && (
+          <>
+            <Group title="Albüm fotoğrafları" hint="Sitede sayfaları çevrilen bir kitap olarak görünür. Boşsa hikâye fotoğrafları gösterilir. Birden çok fotoğrafı aynı anda seçebilirsin.">
+              <MultiUpload adminKey={adminKey} notify={notify}
+                onUploaded={(urls) => set({ album: [...(site.album || []), ...urls.map((photo) => ({ photo, caption: '' }))] })} />
+              <label className="atoggle">
+                <input type="checkbox" checked={Boolean(site.albumMemories)} onChange={(e) => set({ albumMemories: e.target.checked })} />
+                <span>Anı Duvarı'nın en beğenilen 12 fotoğrafını da albümün sonuna ekle</span>
+              </label>
+            </Group>
+            <ListEditor items={site.album || []} onChange={(album) => set({ album })}
+              blank={{ photo: '', caption: '' }}
+              addLabel="+ Tek fotoğraf ekle"
+              render={(item, update) => (
+                <>
+                  <PhotoField value={item.photo} adminKey={adminKey} notify={notify} folder="album" onChange={(url) => update({ photo: url })} />
+                  <Field label="Not (fotoğrafın altında ve karşı sayfada)" value={item.caption} onChange={(v) => update({ caption: v })} />
+                  <Field label="Uzun açıklama (isteğe bağlı, karşı sayfada)" textarea value={item.text || ''} onChange={(v) => update({ text: v })} />
+                  <En>
+                    <Field label="Not (İngilizce)" value={item.captionEn || ''} onChange={(v) => update({ captionEn: v })} />
+                    <Field label="Uzun açıklama (İngilizce)" textarea value={item.textEn || ''} onChange={(v) => update({ textEn: v })} />
+                  </En>
+                </>
+              )} />
+          </>
+        )}
+
         {tab === 'program' && (
           <ListEditor items={site.program} onChange={(program) => set({ program })}
             blank={{ time: '22:00', title: 'Yeni', note: '' }}
@@ -330,7 +358,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
 
         {tab === 'bolum' && (
           <Group title="Görünen bölümler">
-            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['rsvp', 'Katılım bildirimi (LCV)'], ['faq', 'Sıkça sorulanlar'], ['gold', 'Altın köşesi / IBAN'], ['wishes', 'İyi dilekler'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
+            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['rsvp', 'Katılım bildirimi (LCV)'], ['faq', 'Sıkça sorulanlar'], ['gold', 'Altın köşesi / IBAN'], ['wishes', 'İyi dilekler'], ['album', 'Albüm'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
               <label key={k} className="atoggle">
                 <input type="checkbox" checked={site.sections[k] !== false}
                   onChange={(e) => setIn('sections', { [k]: e.target.checked })} />
@@ -464,12 +492,46 @@ function FileButton({ accept, label, adminKey, notify, onUploaded, folder, max }
   )
 }
 
-function PhotoField({ value, onChange, adminKey, notify, max = 1600 }) {
+// Birden çok fotoğrafı sırayla küçültüp yükler
+function MultiUpload({ adminKey, notify, onUploaded }) {
+  const input = useRef(null)
+  const [state, setState] = useState(null)
+  const pick = async (e) => {
+    const files = [...(e.target.files || [])].filter((f) => f.type.startsWith('image/'))
+    e.target.value = ''
+    if (!files.length) return
+    const urls = []
+    for (const [i, file] of files.entries()) {
+      setState(`${i + 1}/${files.length}`)
+      try {
+        const { blob } = await shrink(file, 1800)
+        urls.push(await uploadBlob('album', blob, { adminKey }))
+      } catch {
+        notify(`${file.name} yüklenemedi, diğerleriyle devam ediliyor`)
+      }
+    }
+    setState(null)
+    if (urls.length) {
+      onUploaded(urls)
+      notify(`${urls.length} fotoğraf eklendi. Kaydetmeyi unutma ✓`)
+    }
+  }
+  return (
+    <>
+      <input ref={input} type="file" accept="image/*" multiple hidden onChange={pick} />
+      <button type="button" className="abtn abtn--block" disabled={state !== null} onClick={() => input.current?.click()}>
+        {state ? `Yükleniyor… ${state}` : '📷 Fotoğrafları seç (birden çok)'}
+      </button>
+    </>
+  )
+}
+
+function PhotoField({ value, onChange, adminKey, notify, max = 1600, folder = 'site' }) {
   return (
     <div className="aphoto">
       {value ? <img src={value} alt="" /> : <div className="aphoto__empty">Fotoğraf yok</div>}
       <FileButton accept="image/*" label={value ? 'Fotoğrafı değiştir' : 'Fotoğraf yükle'} adminKey={adminKey}
-        notify={notify} onUploaded={onChange} folder="site" max={max} />
+        notify={notify} onUploaded={onChange} folder={folder} max={max} />
     </div>
   )
 }
