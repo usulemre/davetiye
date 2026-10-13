@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { statusOf } from '../guests'
 import { formatDate } from '../date'
+import { defaults } from '../config'
 
 const byTable = (a, b) => a.localeCompare(b, 'tr', { numeric: true })
 const people = (g) => (statusOf(g) === 'yes' ? g.rsvp.count : g.seats)
 
 // ---------- Özet: grafiklerle katılım durumu ----------
-export function Overview({ store, site }) {
+export function Overview({ store, site, onOpen }) {
   const { guests } = store
   if (!guests) return <p className="ahint">Yükleniyor…</p>
-  if (!guests.length) return <p className="ahint">Henüz davetli yok. "Davetliler" sekmesinden ekleyince özet burada görünür.</p>
+  if (!guests.length) return <><Checklist site={site} guests={guests} onOpen={onOpen} /><p className="ahint">Henüz davetli yok. "Davetliler" bölümünden ekleyince özet burada görünür.</p></>
 
   const yes = guests.filter((g) => statusOf(g) === 'yes')
   const no = guests.filter((g) => statusOf(g) === 'no')
@@ -34,6 +35,7 @@ export function Overview({ store, site }) {
 
   return (
     <div className="ov">
+      <Checklist site={site} guests={guests} onOpen={onOpen} />
       <div className="ov__hero">
         <Donut parts={[[yes.length, 'var(--ov-yes)'], [no.length, 'var(--ov-no)'], [wait.length, 'var(--ov-wait)']]}>
           <b>{Math.round((answered / guests.length) * 100)}%</b>
@@ -81,6 +83,41 @@ export function Overview({ store, site }) {
         </section>
       )}
     </div>
+  )
+}
+
+// Düğüne hazırlık: eksik kalan ya da kontrol edilmesi gereken şeyler
+function Checklist({ site, guests, onOpen }) {
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b)
+  const unsent = guests.filter((g) => !g.sentAt && g.source !== 'site').length
+  const unseated = guests.filter((g) => statusOf(g) === 'yes' && !g.table).length
+  const items = [
+    [!/0000 0000/.test(site.gift.iban) && site.gift.bank !== 'Banka Adı', 'IBAN ve banka adını yaz', 'Altın köşesinde şu an örnek numara görünüyor', 'altin'],
+    [guests.length > 0, 'Davetlileri ekle', 'Excel listesini yapıştırarak hepsini birden ekleyebilirsin', 'davetli'],
+    [guests.length > 0 && unsent === 0, unsent ? `${unsent} davetliye davet gönder` : 'Davetleri gönder', '"Sırayla gönder" ile WhatsApp\'tan tek tek hızlıca', 'davetli'],
+    [!same(site.faq, defaults.faq), 'Sıkça sorulanları kontrol et', 'Çocuk ve kıyafet cevapları örnek olarak yazıldı', 'sss'],
+    [!same(site.program, defaults.program), 'Programı kontrol et', 'Saatler ve başlıklar sizin düğününüze uysun', 'program'],
+    [Boolean(site.rsvpDeadline), 'Katılım için son tarih yaz', 'İsteğe bağlı, ör. "1 Kasım"', 'genel'],
+    [unseated === 0, unseated ? `${unseated} gelen misafiri masaya yerleştir` : 'Masaları yerleştir', '"Otomatik oturt" ile tek dokunuşta', 'masa'],
+  ]
+  const done = items.filter(([ok]) => ok).length
+  if (done === items.length) return null
+  return (
+    <section className="agroup chk">
+      <h4>Hazırlık listesi · {done}/{items.length}</h4>
+      <div className="chk__bar"><i style={{ width: `${(done / items.length) * 100}%` }} /></div>
+      <ul>
+        {items.map(([ok, title, hint, tab]) => (
+          <li key={title} className={ok ? 'is-done' : ''}>
+            <button type="button" onClick={() => onOpen?.(tab)} disabled={ok}>
+              <span className="chk__box" aria-hidden="true">{ok ? '✓' : ''}</span>
+              <span><b>{title}</b>{!ok && <small>{hint}</small>}</span>
+              {!ok && <em aria-hidden="true">›</em>}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 

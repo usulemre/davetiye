@@ -76,7 +76,8 @@ function whatsappText(site, g, reminder) {
   return `Merhaba ${g.name} 🤍\n\n${couple} olarak ${d.day} ${d.monthName} ${d.year} ${d.weekday} günü ${site.venue.name}'da evleniyoruz ve sizi de aramızda görmek istiyoruz 💍\n\nDavetiyeniz ve katılım bildirimi için:\n${guestLink(g.id)}`
 }
 
-const waUrl = (phone, text) => `https://wa.me/${phone || ''}?text=${encodeURIComponent(text)}`
+// wa.me kısa linki yönlendirirken emojileri bozuyor (🤍 → �); doğrudan api.whatsapp.com kullanılır
+export const waUrl = (phone, text) => `https://api.whatsapp.com/send?${phone ? `phone=${phone}&` : ''}text=${encodeURIComponent(text)}`
 
 function downloadCsv(guests) {
   const head = ['Ad Soyad', 'Telefon', 'Taraf', 'Davet (kişi)', 'Durum', 'Gelecek kişi', 'Masa', 'Not', 'Şarkı isteği', 'Giriş', 'Kişiye özel link']
@@ -122,8 +123,11 @@ export function GuestList({ store, site, notify }) {
   const [open, setOpen] = useState(null)
   const [bulk, setBulk] = useState(false)
   const [adding, setAdding] = useState(false)
+  const [sending, setSending] = useState(null)
 
   if (!guests) return <p className="ahint">Yükleniyor…</p>
+  const toInvite = guests.filter((g) => !g.sentAt && g.source !== 'site')
+  const toRemind = guests.filter((g) => g.sentAt && statusOf(g) === 'wait')
   const s = summary(guests)
   const shown = guests
     .filter((g) => filter === 'all' || statusOf(g) === filter)
@@ -138,6 +142,17 @@ export function GuestList({ store, site, notify }) {
         <AddGuest store={store} notify={notify} bulk={bulk} setBulk={setBulk} onClose={guests.length ? () => setAdding(false) : null} />
       ) : (
         <button type="button" className="abtn abtn--block gadd__open" onClick={() => setAdding(true)}>+ Davetli ekle</button>
+      )}
+
+      {(toInvite.length > 0 || toRemind.length > 0) && !sending && (
+        <div className="gsendbar">
+          {toInvite.length > 0 && <button type="button" className="abtn" onClick={() => setSending('invite')}>📨 Sırayla davet gönder ({toInvite.length})</button>}
+          {toRemind.length > 0 && <button type="button" className="abtn abtn--ghost" onClick={() => setSending('remind')}>🔔 Cevap vermeyenlere hatırlat ({toRemind.length})</button>}
+        </div>
+      )}
+      {sending && (
+        <SendFlow key={sending} list={sending === 'invite' ? toInvite : toRemind} reminder={sending === 'remind'}
+          site={site} store={store} onClose={() => setSending(null)} />
       )}
 
       <div className="gtools">
@@ -184,6 +199,53 @@ export function GuestList({ store, site, notify }) {
         </button>
       )}
     </>
+  )
+}
+
+// Davetleri sırayla gönderme: her davetli için tek dokunuşla WhatsApp, sonra sıradaki
+function SendFlow({ list, reminder, site, store, onClose }) {
+  const [queue] = useState(list)
+  const [i, setI] = useState(0)
+  const [sent, setSent] = useState(0)
+  const g = queue[i]
+
+  if (!g) {
+    return (
+      <section className="agroup gsend gsend--done">
+        <p className="gsend__big">🎉</p>
+        <h4>{sent} {reminder ? 'hatırlatma' : 'davet'} gönderildi</h4>
+        <p className="ahint">Cevap verenler listede kendiliğinden "Geliyor" ya da "Gelmiyor" olarak görünecek.</p>
+        <button type="button" className="abtn abtn--block" onClick={onClose}>Tamam</button>
+      </section>
+    )
+  }
+
+  const text = whatsappText(site, g, reminder)
+  const next = () => setI((n) => n + 1)
+  return (
+    <section className="agroup gsend">
+      <div className="gsend__top">
+        <h4>{reminder ? 'Hatırlatma' : 'Davet'} gönderiliyor · {i + 1}/{queue.length}</h4>
+        <button type="button" className="admin__icon" onClick={onClose} aria-label="Kapat">×</button>
+      </div>
+      <div className="gsend__bar"><i style={{ width: `${(i / queue.length) * 100}%` }} /></div>
+      <p className="gsend__name">{g.name}</p>
+      <p className="gsend__phone">{g.phone ? `+${g.phone}` : 'Telefon yok: WhatsApp açılınca kişiyi kendin seçeceksin'}</p>
+      <pre className="gsend__msg">{text}</pre>
+      <a className="abtn abtn--block gsend__wa" href={waUrl(g.phone, text)} target="_blank" rel="noreferrer"
+        onClick={() => {
+          if (!g.sentAt) store.update({ id: g.id, sentAt: true })
+          setSent((n) => n + 1)
+          setTimeout(next, 400)
+        }}>
+        WhatsApp'ta gönder →
+      </a>
+      <div className="gsend__row">
+        <button type="button" className="alink" disabled={i === 0} onClick={() => setI((n) => Math.max(0, n - 1))}>‹ Önceki</button>
+        <button type="button" className="alink" onClick={next}>Bunu atla ›</button>
+      </div>
+      <p className="ahint">WhatsApp'ta mesajı gönderip bu sayfaya geri dön; sıradaki kişi hazır olacak.</p>
+    </section>
   )
 }
 
@@ -608,7 +670,7 @@ export function Songs({ store, notify }) {
       <div className="songs__bar">
         <p className="ahint">{list.length} şarkı isteği</p>
         <button type="button" className="abtn" onClick={copy}>Listeyi kopyala</button>
-        <a className="abtn abtn--ghost" href={`https://wa.me/?text=${encodeURIComponent(`Düğün şarkı istekleri 🎵\n${text}`)}`} target="_blank" rel="noreferrer">WhatsApp'la gönder</a>
+        <a className="abtn abtn--ghost" href={waUrl('', `Düğün şarkı istekleri 🎵\n${text}`)} target="_blank" rel="noreferrer">WhatsApp'la gönder</a>
       </div>
       <ol className="songs">
         {list.map((g) => (

@@ -148,7 +148,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
         )}
       <div className="ap__body" ref={body}>
         <div className="ap__content">
-        {tab === 'ozet' && <Overview store={guests} site={site} />}
+        {tab === 'ozet' && <Overview store={guests} site={site} onOpen={open} />}
         {tab === 'davetli' && <GuestList store={guests} site={site} notify={notify} />}
         {tab === 'masa' && <Tables store={guests} notify={notify} site={site} />}
         {tab === 'kapi' && <Gate store={guests} />}

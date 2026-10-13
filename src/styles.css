@@ -2045,3 +2045,38 @@ a { color: inherit; }
   .ap__head { padding: 16px 28px; }
   .ap__content { padding: 26px 28px 120px; }
 }
+
+/* müzik düğmesi aşağı kaydırırken gizlenir */
+.music { transition: opacity .3s ease, translate .4s var(--ease); }
+.music--tucked { opacity: 0; translate: 0 -70px; pointer-events: none; }
+
+/* ---------- hazırlık listesi ---------- */
+.chk h4 { margin-bottom: 8px; }
+.chk__bar { height: 6px; margin-bottom: 10px; border-radius: 4px; background: #f1ece8; overflow: hidden; }
+.chk__bar i { display: block; height: 100%; background: linear-gradient(90deg, #8fc7a5, #5aa77d); transition: width .6s ease; }
+.chk ul { margin: 0; padding: 0; list-style: none; }
+.chk li button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 2px; border: 0; border-bottom: 1px solid #f3eeea; background: none; color: inherit; text-align: left; }
+.chk li:last-child button { border-bottom: 0; }
+.chk li button:disabled { cursor: default; }
+.chk__box { display: grid; place-items: center; flex: none; width: 24px; height: 24px; border: 1.5px solid #d8cfc8; border-radius: 8px; font-size: 13px; font-weight: 800; color: #fff; }
+.chk li.is-done .chk__box { background: #5aa77d; border-color: #5aa77d; }
+.chk li.is-done b { color: #9a908a; text-decoration: line-through; font-weight: 500; }
+.chk li b { display: block; font-size: 14px; }
+.chk li small { display: block; font-size: 12px; color: #8a7f78; }
+.chk li em { margin-left: auto; font-style: normal; font-size: 22px; color: #b9a27a; }
+
+/* ---------- sırayla davet gönderme ---------- */
+.gsendbar { display: grid; gap: 8px; margin: 0 0 14px; }
+.gsendbar .abtn { width: 100%; }
+.gsend { border: 1.5px solid #e8d9c2 !important; background: #fffaf3 !important; }
+.gsend__top { display: flex; align-items: center; justify-content: space-between; }
+.gsend__top h4 { margin: 0; }
+.gsend__bar { height: 5px; margin: 10px 0 14px; border-radius: 4px; background: #f1e6d6; overflow: hidden; }
+.gsend__bar i { display: block; height: 100%; background: #b38d58; transition: width .4s ease; }
+.gsend__name { margin: 0; font-size: 22px; font-weight: 700; }
+.gsend__phone { margin: 2px 0 10px; font-size: 13px; color: #8a7f78; }
+.gsend__msg { max-height: 150px; overflow: auto; margin: 0 0 12px; padding: 12px; border-radius: 12px; background: #fff; border: 1px solid #f0e6da; font: 12.5px/1.5 var(--sans); white-space: pre-wrap; color: #444; }
+.gsend__wa { display: block; text-align: center; text-decoration: none; background: #25d366 !important; border-color: #25d366 !important; color: #fff !important; font-size: 15px; padding: 14px; }
+.gsend__row { display: flex; justify-content: space-between; margin: 10px 0 4px; }
+.gsend--done { text-align: center; }
+.gsend__big { margin: 0; font-size: 44px; }
