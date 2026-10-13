@@ -34,6 +34,7 @@ async function api(path, options = {}) {
 }
 
 export default function Memories({ notify, admin }) {
+  const [zipping, setZipping] = useState(null)
   const config = useSite()
   const [posts, setPosts] = useState(null)
   const [error, setError] = useState(null)
@@ -121,6 +122,23 @@ export default function Memories({ notify, admin }) {
 
       <Composer name={name} onName={saveName} notify={notify}
         onPosted={(p) => mutate((ps) => [p, ...(ps || [])])} />
+
+      {admin && posts?.length > 0 && (
+        <button type="button" className="memories__zip" disabled={Boolean(zipping)} onClick={async () => {
+          const { downloadAllPhotos } = await import('../zip')
+          setZipping('0')
+          try {
+            await downloadAllPhotos(posts, (n, t) => setZipping(`${n}/${t}`))
+            notify('Fotoğraflar indirildi 📦')
+          } catch {
+            notify('İndirilemedi, tekrar deneyin')
+          } finally {
+            setZipping(null)
+          }
+        }}>
+          📦 {zipping ? `Hazırlanıyor… ${zipping}` : `Tüm fotoğrafları indir (${posts.length})`}
+        </button>
+      )}
 
       {error && <p className="memories__error">{error}</p>}
 

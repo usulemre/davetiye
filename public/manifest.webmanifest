@@ -1,0 +1,13 @@
+{
+  "name": "Muhammed İsmet & Tuğçe · Düğün Davetiyesi",
+  "short_name": "M & T Düğün",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf7f3",
+  "theme_color": "#fbf7f3",
+  "lang": "tr",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

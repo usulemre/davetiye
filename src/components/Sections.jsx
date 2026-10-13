@@ -157,6 +157,7 @@ export function Venue({ onCopy }) {
       <div className="btn-row">
         <a className="btn btn--solid" href={`https://www.google.com/maps/search/?api=1&query=${q}`}
           target="_blank" rel="noreferrer">Yol Tarifi Al</a>
+        <a className="btn btn--line" href={`https://waze.com/ul?q=${q}&navigate=yes`} target="_blank" rel="noreferrer">Waze</a>
         <button className="btn btn--line" type="button"
           onClick={() => onCopy(`${config.venue.name}, ${config.venue.address}`, 'Adres kopyalandı 📍')}>
           Adresi Kopyala

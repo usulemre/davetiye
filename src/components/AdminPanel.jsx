@@ -3,14 +3,15 @@ import { THEMES, themeColors } from '../site'
 import { shrink, uploadBlob } from '../images'
 import { changeCredentials } from '../admin'
 import { useGuests, GuestList, Tables, Gate, QrCodes, Songs } from './GuestAdmin'
+import { Overview } from './AdminExtras'
 
 const TABS = [
-  ['davetli', 'Davetliler'], ['masa', 'Masalar'], ['kapi', 'Kapı girişi'], ['sarki', 'Şarkı istekleri'], ['qr', 'QR & ekran'],
+  ['ozet', 'Özet'], ['davetli', 'Davetliler'], ['masa', 'Masalar'], ['kapi', 'Kapı girişi'], ['sarki', 'Şarkı istekleri'], ['qr', 'QR & ekran'],
   ['genel', 'Genel'], ['tema', 'Renkler'], ['foto', 'Fotoğraflar'], ['hikaye', 'Hikâye'],
   ['program', 'Program'], ['sss', 'Sorular'], ['mekan', 'Mekân'], ['altin', 'Altın / IBAN'], ['muzik', 'Müzik'], ['bolum', 'Bölümler'], ['hesap', 'Hesap'],
 ]
 // Bu sekmelerdeki değişiklikler anında kaydedilir (Kaydet butonu gerekmez)
-const LIVE = ['davetli', 'masa', 'kapi', 'sarki', 'qr']
+const LIVE = ['ozet', 'davetli', 'masa', 'kapi', 'sarki', 'qr']
 const EVENT_TYPES = ['Düğün', 'Nişan', 'Kına', 'Söz', 'Nikâh']
 const COLOR_FIELDS = [
   ['ink', 'Ana renk (koyu)'], ['paper', 'Arka plan'], ['ivory', 'İkincil arka plan'],
@@ -28,7 +29,7 @@ function nextDay(date) {
 }
 
 export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout, onClose, adminKey, dirty, saving, notify }) {
-  const [tab, setTab] = useState('davetli')
+  const [tab, setTab] = useState('ozet')
   const [min, setMin] = useState(false)
   const guests = useGuests(adminKey, notify)
 
@@ -70,8 +71,9 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
       </nav>
 
       <div className="admin__body">
+        {tab === 'ozet' && <Overview store={guests} site={site} />}
         {tab === 'davetli' && <GuestList store={guests} site={site} notify={notify} />}
-        {tab === 'masa' && <Tables store={guests} notify={notify} />}
+        {tab === 'masa' && <Tables store={guests} notify={notify} site={site} />}
         {tab === 'kapi' && <Gate store={guests} />}
         {tab === 'sarki' && <Songs store={guests} notify={notify} />}
         {tab === 'qr' && <QrCodes />}

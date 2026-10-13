@@ -3,6 +3,7 @@ import { guestsApi, guestLink, parseGuestLines, statusOf } from '../guests'
 import { copyText } from '../hooks'
 import { formatDate } from '../date'
 import Qr from './Qr'
+import { PrintButtons } from './AdminExtras'
 
 const Hall3D = lazy(() => import('./Hall3D'))
 
@@ -327,7 +328,7 @@ function autoPlan(groups, tableNames) {
   return moves
 }
 
-export function Tables({ store, notify }) {
+export function Tables({ store, notify, site }) {
   const { guests } = store
   const [sel, setSel] = useState(null)
   const [extra, setExtra] = useState([])
@@ -369,6 +370,7 @@ export function Tables({ store, notify }) {
         <span><b>{total(active) - total(free)}</b> kişi yerleşti</span>
         <span className={free.length ? 'is-warn' : 'is-ok'}>{free.length ? <><b>{total(free)}</b> kişi bekliyor</> : '✓ Herkes yerleşti'}</span>
       </div>
+      {site && <PrintButtons guests={guests} site={site} />}
 
       <div className="tbar">
         {free.length > 0 && (
