@@ -4,6 +4,7 @@ import { copyText } from '../hooks'
 import { formatDate } from '../date'
 import Qr from './Qr'
 import { PrintButtons } from './AdminExtras'
+import Safe from './Safe'
 
 const Hall3D = lazy(() => import('./Hall3D'))
 
@@ -464,6 +465,7 @@ export function Tables({ store, notify, site }) {
 
       {real ? (
         <div className="hallwrap">
+          <Safe name="salon3d" fallback={<div className="hall hall--loading">3D salon bu cihazda açılamadı. Sağ üstten "Plan" görünümünü kullanabilirsin.</div>}>
           <Suspense fallback={<div className="hall hall--loading">3D salon hazırlanıyor…</div>}>
             <Hall3D selected={sel} onSelect={setSel} tables={names.map((t) => ({
               name: t,
@@ -473,6 +475,7 @@ export function Tables({ store, notify, site }) {
               }))),
             }))} />
           </Suspense>
+          </Safe>
           <p className="hall__hint">Parmağınla çevir, iki parmakla yakınlaştır, masaya dokunarak seç</p>
           <button type="button" className="hall__new" onClick={addTable}>+ Yeni masa</button>
         </div>

@@ -131,7 +131,8 @@ export default function Memories({ notify, admin }) {
           const { downloadAllPhotos } = await import('../zip')
           setZipping('0')
           try {
-            await downloadAllPhotos(posts, (n, t) => setZipping(`${n}/${t}`))
+            const wishes = await fetch('/api/wishes').then((r) => r.json()).then((d) => d.wishes || []).catch(() => [])
+            await downloadAllPhotos(posts, (n, t) => setZipping(`${n}/${t}`), wishes)
             notify('Fotoğraflar indirildi 📦')
           } catch {
             notify('İndirilemedi, tekrar deneyin')
@@ -139,7 +140,7 @@ export default function Memories({ notify, admin }) {
             setZipping(null)
           }
         }}>
-          📦 {zipping ? `Hazırlanıyor… ${zipping}` : `Tüm fotoğrafları indir (${posts.length})`}
+          📦 {zipping ? `Hazırlanıyor… ${zipping}` : `Tüm fotoğrafları ve dilekleri indir (${posts.length})`}
         </button>
       )}
 

@@ -7,6 +7,7 @@ import Intro from './components/Intro'
 import Music from './components/Music'
 import Hero from './components/Hero'
 import Orbs from './components/Orbs'
+import Safe from './components/Safe'
 import Story from './components/Story'
 import Gold from './components/Gold'
 import Memories from './components/Memories'
@@ -131,31 +132,33 @@ export default function App() {
   if (isScreen) {
     return (
       <SiteContext.Provider value={site}>
-        <Suspense fallback={<div className="boot" />}><Screen /></Suspense>
+        <Safe name="ekran" fallback={<p className="ap-crash">Ekran açılamadı, sayfayı yenileyin.</p>}><Suspense fallback={<div className="boot" />}><Screen /></Suspense></Safe>
       </SiteContext.Provider>
     )
   }
 
   return (
     <SiteContext.Provider value={site}>
-      <Intro guestName={guest?.name} onOpen={(fromTap) => { setOpened(true); if (fromTap) music.current?.play() }} />
+      <Safe name="zarf" onError={() => setOpened(true)}>
+        <Intro guestName={guest?.name} onOpen={(fromTap) => { setOpened(true); if (fromTap) music.current?.play() }} />
+      </Safe>
       <div className="progress" ref={bar} aria-hidden="true" />
-      <Music key={site.music} ref={music} />
+      <Safe name="muzik"><Music key={site.music} ref={music} /></Safe>
       <main className={`page ${opened ? 'page--opened' : ''}`}>
         <Orbs />
-        <Hero opened={opened} />
-        <Invite guestName={guest?.name} />
-        {show.story !== false && site.story?.length > 0 && <Story />}
+        <Safe name="kapak"><Hero opened={opened} /></Safe>
+        <Safe name="davet"><Invite guestName={guest?.name} /></Safe>
+        {show.story !== false && site.story?.length > 0 && <Safe name="hikaye"><Story /></Safe>}
         <div className="bento">
-          <When />
-          {show.program !== false && <Program />}
-          <Venue onCopy={handleCopy} />
+          <Safe name="tarih"><When /></Safe>
+          {show.program !== false && <Safe name="program"><Program /></Safe>}
+          <Safe name="mekan"><Venue onCopy={handleCopy} /></Safe>
         </div>
-        {show.rsvp !== false && <Rsvp guest={guest} onGuest={setGuest} notify={notify} />}
-        {show.faq !== false && <Faq />}
-        {show.gold !== false && <Gold onCopy={handleCopy} />}
-        {show.wishes !== false && <Wishes notify={notify} admin={admin} />}
-        {show.memories !== false && <Memories notify={notify} admin={admin} />}
+        {show.rsvp !== false && <Safe name="lcv"><Rsvp guest={guest} onGuest={setGuest} notify={notify} /></Safe>}
+        {show.faq !== false && <Safe name="sss"><Faq /></Safe>}
+        {show.gold !== false && <Safe name="altin"><Gold onCopy={handleCopy} /></Safe>}
+        {show.wishes !== false && <Safe name="dilek"><Wishes notify={notify} admin={admin} /></Safe>}
+        {show.memories !== false && <Safe name="anilar"><Memories notify={notify} admin={admin} /></Safe>}
         <Outro onCopy={handleCopy} notify={notify} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>
       <nav className={`dock ${docked && !editing ? 'dock--show' : ''}`}>
@@ -176,8 +179,10 @@ export default function App() {
       )}
       {admin && editing && (
         <>
+          <Safe name="panel" fallback={<div className="ap-crash"><p>Panelde bir sorun çıktı 😕 Sayfayı yenileyip tekrar dene.</p><button type="button" className="abtn" onClick={() => window.location.reload()}>Sayfayı yenile</button></div>}>
           <AdminPanel site={site} adminKey={admin} notify={notify} dirty={Boolean(draft) && JSON.stringify(toSaved(draft)) !== JSON.stringify(toSaved(mergeSite(saved)))}
             saving={saving} onChange={setDraft} onSave={save} onCancel={cancel} onLogout={logout} onClose={closePanel} />
+          </Safe>
         </>
       )}
 

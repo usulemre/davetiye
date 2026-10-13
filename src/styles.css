@@ -2095,3 +2095,4 @@ a { color: inherit; }
 .composer__preview video { display: block; width: 100%; max-height: 360px; background: #111; }
 .lb__stage video { max-width: 100%; max-height: 100%; border-radius: 10px; background: #000; }
 .screen__vid { animation: none; }
+.ap-crash { position: fixed; inset: 0; z-index: 150; display: grid; place-content: center; gap: 14px; padding: 24px; background: #f5f2ef; text-align: center; font-family: var(--sans); }

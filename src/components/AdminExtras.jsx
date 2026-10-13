@@ -8,10 +8,11 @@ const byTable = (a, b) => a.localeCompare(b, 'tr', { numeric: true })
 const people = (g) => (statusOf(g) === 'yes' ? g.rsvp.count : g.seats)
 
 // ---------- Özet: grafiklerle katılım durumu ----------
-export function Overview({ store, site, onOpen }) {
+export function Overview({ store, site, onOpen, adminKey }) {
   const { guests } = store
+  const usage = useUsage(adminKey)
   if (!guests) return <p className="ahint">Yükleniyor…</p>
-  if (!guests.length) return <><Checklist site={site} guests={guests} onOpen={onOpen} /><p className="ahint">Henüz davetli yok. "Davetliler" bölümünden ekleyince özet burada görünür.</p></>
+  if (!guests.length) return <><Checklist site={site} guests={guests} onOpen={onOpen} /><p className="ahint">Henüz davetli yok. "Davetliler" bölümünden ekleyince özet burada görünür.</p><Storage usage={usage} /></>
 
   const yes = guests.filter((g) => statusOf(g) === 'yes')
   const no = guests.filter((g) => statusOf(g) === 'no')
@@ -73,6 +74,8 @@ export function Overview({ store, site, onOpen }) {
         </section>
       )}
 
+      <Storage usage={usage} />
+
       {entered > 0 && (
         <section className="agroup">
           <h4>Kapıdan giriş</h4>
@@ -119,6 +122,36 @@ function Checklist({ site, guests, onOpen }) {
       </ul>
     </section>
   )
+}
+
+const LIMIT = 1024 * 1024 * 1024
+const mb = (n) => (n >= 1024 * 1024 * 1024 ? `${(n / 1024 / 1024 / 1024).toFixed(2)} GB` : n < 10 * 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.round(n / 1024 / 1024)} MB`)
+
+function Storage({ usage }) {
+  if (!usage) return null
+  return (
+    <section className="agroup">
+      <h4>Depolama</h4>
+      <div className="ov__bar ov__bar--wide">
+        <div><i style={{ width: `${Math.min(100, (usage.total / LIMIT) * 100)}%`, background: usage.total > LIMIT * 0.8 ? '#d9897a' : undefined }} /></div>
+        <b>{mb(usage.total)}</b>
+      </div>
+      <p className="ahint">
+        Ücretsiz alan yaklaşık {mb(LIMIT)}. Anı Duvarı: {mb(usage.memories)}{usage.videos ? ` (${usage.videos} video)` : ''} · Site dosyaları: {mb(usage.site)}.
+        {usage.total > LIMIT * 0.8 && ' Alan dolmak üzere: fotoğrafları indirip eski videoları silebilirsin.'}
+      </p>
+    </section>
+  )
+}
+
+function useUsage(adminKey) {
+  const [usage, setUsage] = useState(null)
+  useEffect(() => {
+    if (!adminKey) return
+    fetch('/api/admin', { headers: { 'x-admin-key': adminKey } })
+      .then((r) => (r.ok ? r.json() : null)).then(setUsage).catch(() => {})
+  }, [adminKey])
+  return usage
 }
 
 function Donut({ parts, children }) {

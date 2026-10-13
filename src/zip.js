@@ -1,5 +1,5 @@
 // Anı Duvarı'ndaki bütün fotoğrafları tek ZIP dosyası olarak indirir
-export async function downloadAllPhotos(posts, onProgress) {
+export async function downloadAllPhotos(posts, onProgress, wishes = []) {
   const { zipSync } = await import('fflate')
   const files = {}
   const lines = []
@@ -22,6 +22,13 @@ export async function downloadAllPhotos(posts, onProgress) {
     onProgress?.(++done, list.length)
   }
   files['fotograflar-listesi.txt'] = new TextEncoder().encode(lines.join('\r\n'))
+  if (wishes.length) {
+    const text = [...wishes].reverse().map((w) => {
+      const date = new Date(w.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })
+      return `${w.emoji} ${w.text}\r\n   — ${w.name} · ${date}`
+    }).join('\r\n\r\n')
+    files['iyi-dilekler.txt'] = new TextEncoder().encode(text)
+  }
   const zip = zipSync(files)
   const a = document.createElement('a')
   a.href = URL.createObjectURL(new Blob([zip], { type: 'application/zip' }))
