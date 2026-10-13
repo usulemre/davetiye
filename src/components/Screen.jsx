@@ -118,6 +118,7 @@ export default function Screen() {
           <Qr text={link} size={220} alt="Anı Duvarı QR kodu" />
         </div>
         <p className="screen__call">Telefonunla okut,<br /><b>fotoğrafını ekle</b>,<br />burada görün! 📸</p>
+        <p className="screen__call screen__call--en">Scan · share your photo · see it here</p>
         {posts?.length > 0 && <p className="screen__count">{posts.length} anı paylaşıldı · {index % posts.length + 1}/{posts.length}</p>}
       </aside>
 

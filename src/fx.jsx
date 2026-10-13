@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const rand = (a, b) => a + Math.random() * (b - a)
 
@@ -69,6 +69,23 @@ export function useScrollFx(bar) {
   }, [bar])
 }
 
+// Aşağı kaydırırken köşedeki düğmeler gizlenir (altındaki içeriği kapatmasın), yukarı kaydırınca geri gelir
+export function useTucked() {
+  const [tucked, setTucked] = useState(false)
+  useEffect(() => {
+    let last = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      if (Math.abs(y - last) < 8) return
+      setTucked(y > window.innerHeight * 0.8 && y > last)
+      last = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  return tucked
+}
+
 // Bölüm kartları ekrana girerken arkaya yatık, aşağıdan doğrulup yerine oturur.
 // Kaydırmaya bağlı olduğu için parmak durunca hareket de durur.
 export function useScroll3D() {
@@ -84,6 +101,16 @@ export function useScroll3D() {
         // 0: tam yerinde, 1: ekranın altından yeni giriyor
         const p = Math.min(1, Math.max(0, (r.top - vh * 0.62) / (vh * 0.38)))
         const e = p * p
+        // Yerine oturan kartta 3D tamamen kalkar: Safari aksi hâlde yazıları
+        // ilk (küçük, eğik) hâlinden kalma bulanık bir resim olarak gösteriyor
+        if (e < 0.0005) {
+          if (!el.classList.contains('is-flat')) {
+            el.classList.add('is-flat')
+            for (const k of ['--srx', '--sty', '--ssc', '--sop']) el.style.removeProperty(k)
+          }
+          continue
+        }
+        el.classList.remove('is-flat')
         el.style.setProperty('--srx', `${(e * 26).toFixed(2)}deg`)
         el.style.setProperty('--sty', `${(e * 90).toFixed(1)}px`)
         el.style.setProperty('--ssc', (1 - e * 0.1).toFixed(3))

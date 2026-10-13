@@ -1,14 +1,14 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { copyText } from './hooks'
 import { SiteContext, mergeSite, applyTheme } from './site'
-import { useScrollFx, useScroll3D } from './fx'
+import { useScrollFx, useScroll3D, useTucked } from './fx'
 import { getAdminKey, verifyAdmin, logout as endSession, isLoginPath } from './admin'
 import Intro from './components/Intro'
 import Music from './components/Music'
 import Hero from './components/Hero'
 import Orbs from './components/Orbs'
 import Safe from './components/Safe'
-import { t, getLang, setLang } from './i18n'
+import { t, getLang, setLang, serverMsg } from './i18n'
 import Story from './components/Story'
 import Gold from './components/Gold'
 import Memories from './components/Memories'
@@ -49,6 +49,7 @@ export default function App() {
   const bar = useRef(null)
   useScrollFx(bar)
   useScroll3D()
+  const tucked = useTucked()
 
   // Kaydedilmiş site ayarlarını yükle
   useEffect(() => {
@@ -82,7 +83,7 @@ export default function App() {
   }, [])
 
   const notify = useCallback((message) => {
-    setToast(message)
+    setToast(serverMsg(message))
     clearTimeout(timer.current)
     timer.current = setTimeout(() => setToast(null), 2600)
   }, [])
@@ -152,7 +153,7 @@ export default function App() {
       <div className="progress" ref={bar} aria-hidden="true" />
       <Safe name="muzik"><Music key={site.music} ref={music} /></Safe>
       {!editing && (
-        <button type="button" className="lang" onClick={switchLang} aria-label={lang === 'en' ? 'Türkçe' : 'English'}>
+        <button type="button" className={`lang ${tucked ? 'lang--tucked' : ''}`} onClick={switchLang} aria-label={lang === 'en' ? 'Türkçe' : 'English'}>
           <b className={lang === 'tr' ? 'is-on' : ''}>TR</b><i /><b className={lang === 'en' ? 'is-on' : ''}>EN</b>
         </button>
       )}

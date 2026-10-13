@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useSite } from '../site'
+import { useTucked } from '../fx'
 import { t } from '../i18n'
 
 const Music = forwardRef(function Music(_, ref) {
@@ -8,20 +9,7 @@ const Music = forwardRef(function Music(_, ref) {
   const [playing, setPlaying] = useState(false)
   const [available, setAvailable] = useState(true)
   const userPaused = useRef(false)
-  const [tucked, setTucked] = useState(false)
-
-  // Aşağı kaydırırken düğme gizlenir (altındaki içeriği kapatmasın), yukarı kaydırınca geri gelir
-  useEffect(() => {
-    let last = window.scrollY
-    const onScroll = () => {
-      const y = window.scrollY
-      if (Math.abs(y - last) < 8) return
-      setTucked(y > window.innerHeight * 0.8 && y > last)
-      last = y
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  const tucked = useTucked()
 
   const play = () => {
     const el = audio.current
