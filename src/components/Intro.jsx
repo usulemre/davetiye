@@ -1,14 +1,31 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useSite } from '../site'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { useSite, themeColors } from '../site'
 import { isLoginPath } from '../admin'
 import { formatDate } from '../date'
 
 const rand = (a, b) => a + Math.random() * (b - a)
+const Envelope3D = lazy(() => import('./Envelope3D'))
+
+function hasWebGL() {
+  try {
+    const c = document.createElement('canvas')
+    return Boolean(c.getContext('webgl2') || c.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
 
 export default function Intro({ onOpen, guestName }) {
   const config = useSite()
   const d = formatDate(config.start)
   const [state, setState] = useState(() => (window.location.hash || isLoginPath() ? 'gone' : 'idle'))
+  // 3D zarf: 'wait' yükleniyor, 'on' hazır, 'off' desteklenmiyor (eski zarf gösterilir)
+  const [three, setThree] = useState(() => (hasWebGL() ? 'wait' : 'off'))
+  useEffect(() => {
+    if (three !== 'wait') return undefined
+    const t = setTimeout(() => setThree((v) => (v === 'wait' ? 'off' : v)), 5000)
+    return () => clearTimeout(t)
+  }, [three])
 
   // Arka planda yavaşça parlayan altın tozları ve mühür kırılınca saçılan kıvılcımlar
   const dust = useMemo(() => Array.from({ length: 26 }, () => ({
@@ -36,14 +53,15 @@ export default function Intro({ onOpen, guestName }) {
     navigator.vibrate?.(25)
     setState('opening')
     onOpen(true)
-    setTimeout(() => setState('leaving'), 2300)
-    setTimeout(() => setState('gone'), 3400)
+    const is3d = three === 'on'
+    setTimeout(() => setState('leaving'), is3d ? 3000 : 2300)
+    setTimeout(() => setState('gone'), is3d ? 4400 : 3400)
   }
 
   if (state === 'gone') return null
 
   return (
-    <div className={`intro intro--${state}`} onClick={open}
+    <div className={`intro intro--${state} ${three === 'on' ? 'intro--3d' : ''}`} onClick={open}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open()}
       role="button" tabIndex={0} aria-label="Davetiyeyi aç">
       <div className="intro__dust" aria-hidden="true">
@@ -56,7 +74,15 @@ export default function Intro({ onOpen, guestName }) {
         {guestName ? <>Sevgili {guestName},<br />bir davetiyeniz var</> : 'Bir davetiyeniz var'}
       </p>
 
-      <div className="env">
+      {three !== 'off' && (
+        <Suspense fallback={null}>
+          <Envelope3D opening={state !== 'idle'} colors={themeColors(config)} initials={config.initials}
+            card={{ kicker: config.eventType, groom: `${config.groom.first} ${config.groom.last}`, bride: `${config.bride.first} ${config.bride.last}`, date: `${d.day} · ${d.month} · ${d.year}` }}
+            onReady={() => setThree('on')} onFail={() => setThree('off')} />
+        </Suspense>
+      )}
+
+      <div className={`env ${three === 'off' ? '' : 'env--hidden'}`}>
         <div className="env__glow" />
         <div className="env__float">
           <div className="env__back" />

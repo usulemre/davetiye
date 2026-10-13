@@ -1688,3 +1688,20 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .section::after, .gold::after { animation: none; }
 }
+
+/* ---------- 3D zarf ---------- */
+.env3d { position: absolute; inset: 0; z-index: 0; animation: appear 1s ease forwards; opacity: 0; }
+.env3d canvas { display: block; width: 100% !important; height: 100% !important; }
+.env--hidden { display: none; }
+.intro--3d .intro__dust { z-index: 0; }
+.intro--3d .intro__kicker, .intro--3d .intro__names, .intro--3d .intro__hint { position: absolute; left: 16px; right: 16px; z-index: 1; margin: 0; pointer-events: none; }
+.intro--3d .intro__kicker { top: calc(9svh + env(safe-area-inset-top)); justify-content: center; }
+.intro--3d .intro__names { bottom: calc(14svh + env(safe-area-inset-bottom)); }
+.intro--3d .intro__hint { bottom: calc(8svh + env(safe-area-inset-bottom)); }
+.intro--3d::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0;
+  background: radial-gradient(70% 50% at 50% 45%, #fff, var(--paper));
+  transition: opacity .45s ease;
+}
+.intro--3d.intro--leaving::after { opacity: 1; }
+.intro--3d.intro--leaving { transition: opacity .9s ease .4s; }
