@@ -1,17 +1,43 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { THEMES, themeColors } from '../site'
 import { shrink, uploadBlob } from '../images'
 import { changeCredentials } from '../admin'
 import { useGuests, GuestList, Tables, Gate, QrCodes, Songs } from './GuestAdmin'
 import { Overview } from './AdminExtras'
+import { statusOf } from '../guests'
 
-const TABS = [
-  ['ozet', 'Özet'], ['davetli', 'Davetliler'], ['masa', 'Masalar'], ['kapi', 'Kapı girişi'], ['sarki', 'Şarkı istekleri'], ['qr', 'QR & ekran'],
-  ['genel', 'Genel'], ['tema', 'Renkler'], ['foto', 'Fotoğraflar'], ['hikaye', 'Hikâye'],
-  ['program', 'Program'], ['sss', 'Sorular'], ['mekan', 'Mekân'], ['altin', 'Altın / IBAN'], ['muzik', 'Müzik'], ['bolum', 'Bölümler'], ['hesap', 'Hesap'],
+// Panel menüsü: gruplar ve her bölümün simgesi, kısa açıklaması
+const MENU = [
+  ['Misafirler', [
+    ['ozet', 'Özet', '📊', 'Katılım durumu ve grafikler'],
+    ['davetli', 'Davetliler', '👥', 'Ekle, davet gönder, düzenle'],
+    ['masa', 'Masalar', '🪑', 'Oturma planı ve kartlar'],
+    ['kapi', 'Kapı girişi', '🚪', 'Düğün günü giriş kontrolü'],
+    ['sarki', 'Şarkı istekleri', '🎵', 'DJ listesi'],
+  ]],
+  ['Davetiye içeriği', [
+    ['genel', 'İsimler & tarih', '💍', 'Gelin, damat, tarih, metinler'],
+    ['foto', 'Fotoğraflar', '🖼️', 'Kapak ve kapanış'],
+    ['hikaye', 'Hikâyemiz', '📖', 'Fotoğraflı hikâye kartları'],
+    ['program', 'Program', '🕖', 'Günün akışı'],
+    ['mekan', 'Mekân', '📍', 'Adres ve konum'],
+    ['altin', 'Altın / IBAN', '💰', 'Hesap bilgileri'],
+    ['sss', 'Sorular', '❓', 'Sıkça sorulanlar'],
+    ['muzik', 'Müzik', '🎶', 'Arka plan şarkısı'],
+  ]],
+  ['Görünüm', [
+    ['tema', 'Renkler', '🎨', 'Hazır temalar, kendi renklerin'],
+    ['bolum', 'Bölümler', '🧩', 'Göster ya da gizle'],
+  ]],
+  ['Araçlar', [
+    ['qr', 'QR & dev ekran', '📱', 'QR kodlar, düğün gecesi ekranı'],
+    ['hesap', 'Hesap', '🔐', 'Kullanıcı adı ve şifre'],
+  ]],
 ]
-// Bu sekmelerdeki değişiklikler anında kaydedilir (Kaydet butonu gerekmez)
-const LIVE = ['ozet', 'davetli', 'masa', 'kapi', 'sarki', 'qr']
+const ITEMS = MENU.flatMap(([, items]) => items)
+// Bu bölümlerdeki değişiklikler anında kaydedilir (Kaydet butonu gerekmez)
+const LIVE = ['ozet', 'davetli', 'masa', 'kapi', 'sarki', 'qr', 'hesap']
+const wide = () => window.matchMedia('(min-width: 900px)').matches
 const EVENT_TYPES = ['Düğün', 'Nişan', 'Kına', 'Söz', 'Nikâh']
 const COLOR_FIELDS = [
   ['ink', 'Ana renk (koyu)'], ['paper', 'Arka plan'], ['ivory', 'İkincil arka plan'],
@@ -29,9 +55,32 @@ function nextDay(date) {
 }
 
 export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout, onClose, adminKey, dirty, saving, notify }) {
-  const [tab, setTab] = useState('ozet')
+  const [isWide, setWide] = useState(wide)
+  const [tab, setTab] = useState(() => (wide() ? 'ozet' : null))
   const [min, setMin] = useState(false)
   const guests = useGuests(adminKey, notify)
+  const body = useRef(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 900px)')
+    const on = () => { setWide(mq.matches); if (mq.matches) setTab((t) => t || 'ozet') }
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+
+  const open = (id) => {
+    setTab(id)
+    body.current?.scrollTo(0, 0)
+  }
+
+  // Menüde gösterilen küçük uyarı sayıları
+  const list = guests.guests || []
+  const badges = {
+    davetli: list.filter((g) => statusOf(g) === 'wait').length && `${list.filter((g) => statusOf(g) === 'wait').length} cevap yok`,
+    masa: list.filter((g) => !g.table && statusOf(g) !== 'no').length && `${list.filter((g) => !g.table && statusOf(g) !== 'no').length} masasız`,
+    sarki: list.filter((g) => g.rsvp?.song).length || '',
+  }
+  const current = ITEMS.find(([id]) => id === tab)
 
   const set = (patch) => onChange({ ...site, ...patch })
   const setIn = (key, patch) => onChange({ ...site, [key]: { ...site[key], ...patch } })
@@ -52,25 +101,53 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
   }
 
   return (
-    <aside className="admin" role="dialog" aria-label="Yönetici paneli">
-      <header className="admin__head">
-        <div>
-          <strong>Davetiyeyi düzenle</strong>
-          <span>Değişiklikler kaydedince herkese yansır</span>
-        </div>
-        <div className="admin__actions">
-          <button type="button" className="admin__icon" onClick={() => setMin(true)} title="Önizle" aria-label="Önizle">👁</button>
-          <button type="button" className="admin__icon" onClick={onClose} title="Kapat" aria-label="Paneli kapat">×</button>
-        </div>
-      </header>
-
-      <nav className="admin__tabs">
-        {TABS.map(([id, label]) => (
-          <button key={id} type="button" className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)}>{label}</button>
+    <aside className={`ap ${tab ? 'ap--section' : 'ap--home'}`} role="dialog" aria-label="Yönetim paneli">
+      <nav className="ap__side">
+        <header className="ap__brand">
+          <div>
+            <strong>Yönetim paneli</strong>
+            <span>{site.groom.first} & {site.bride.first}</span>
+          </div>
+          {!isWide && (
+            <div className="ap__actions">
+              <button type="button" className="ap__icon" onClick={() => setMin(true)} title="Siteyi gör" aria-label="Siteyi gör">👁</button>
+              <button type="button" className="ap__icon" onClick={onClose} aria-label="Paneli kapat">×</button>
+            </div>
+          )}
+        </header>
+        {MENU.map(([group, items]) => (
+          <section key={group} className="ap__group">
+            <h3>{group}</h3>
+            <div className="ap__items">
+              {items.map(([id, label, icon, hint]) => (
+                <button key={id} type="button" className={`ap__item ${tab === id ? 'is-active' : ''}`} onClick={() => open(id)}>
+                  <span className="ap__ico" aria-hidden="true">{icon}</span>
+                  <span className="ap__txt"><b>{label}</b><small>{hint}</small></span>
+                  {badges[id] ? <em className="ap__badge">{badges[id]}</em> : null}
+                </button>
+              ))}
+            </div>
+          </section>
         ))}
+        <button type="button" className="ap__logout" onClick={onLogout}>Yönetici modundan çık</button>
       </nav>
 
-      <div className="admin__body">
+      <div className="ap__main">
+        {current && (
+          <header className="ap__head">
+            {!isWide && <button type="button" className="ap__back" onClick={() => setTab(null)}>‹ Menü</button>}
+            <div className="ap__title">
+              <strong><span aria-hidden="true">{current[2]}</span> {current[1]}</strong>
+              <span>{LIVE.includes(tab) ? 'Değişiklikler anında kaydedilir ✓' : 'Değişiklikleri bitirince alttan Kaydet\'e bas'}</span>
+            </div>
+            <div className="ap__actions">
+              <button type="button" className="ap__icon" onClick={() => setMin(true)} title="Siteyi gör" aria-label="Siteyi gör">👁</button>
+              <button type="button" className="ap__icon" onClick={onClose} aria-label="Paneli kapat">×</button>
+            </div>
+          </header>
+        )}
+      <div className="ap__body" ref={body}>
+        <div className="ap__content">
         {tab === 'ozet' && <Overview store={guests} site={site} />}
         {tab === 'davetli' && <GuestList store={guests} site={site} notify={notify} />}
         {tab === 'masa' && <Tables store={guests} notify={notify} site={site} />}
@@ -241,17 +318,17 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
           </Group>
         )}
         {tab === 'hesap' && <Account adminKey={adminKey} notify={notify} />}
+        </div>
+      </div>
       </div>
 
-      <footer className="admin__foot">
-        <button type="button" className="alink" onClick={onLogout}>Yönetici modundan çık</button>
-        {LIVE.includes(tab) && !dirty ? <span className="admin__live">Anında kaydedilir</span> : <div>
-          <button type="button" className="abtn abtn--ghost" disabled={!dirty || saving} onClick={onCancel}>Vazgeç</button>
-          <button type="button" className="abtn" disabled={!dirty || saving} onClick={onSave}>
-            {saving ? 'Kaydediliyor…' : 'Kaydet'}
-          </button>
-        </div>}
-      </footer>
+      {dirty && (
+        <footer className="ap__save">
+          <span>Kaydedilmemiş değişiklik var</span>
+          <button type="button" className="abtn abtn--ghost" disabled={saving} onClick={onCancel}>Vazgeç</button>
+          <button type="button" className="abtn" disabled={saving} onClick={onSave}>{saving ? 'Kaydediliyor…' : 'Kaydet'}</button>
+        </footer>
+      )}
     </aside>
   )
 }
