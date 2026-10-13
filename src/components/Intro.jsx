@@ -5,7 +5,6 @@ import { formatDate } from '../date'
 import { isLite } from '../perf'
 
 const rand = (a, b) => a + Math.random() * (b - a)
-const Envelope3D = lazy(() => import('./Envelope3D'))
 
 function hasWebGL() {
   try {
@@ -16,15 +15,21 @@ function hasWebGL() {
   }
 }
 
+// 3D zarfın dosyaları sayfa açılır açılmaz inmeye başlar (site ayarlarını beklemez)
+const WANT_3D = !window.location.hash && !isLoginPath() && hasWebGL() && !isLite()
+const envChunk = WANT_3D ? import('./Envelope3D') : null
+const Envelope3D = lazy(() => envChunk || import('./Envelope3D'))
+
 export default function Intro({ onOpen, guestName }) {
   const config = useSite()
   const d = formatDate(config.start)
   const [state, setState] = useState(() => (window.location.hash || isLoginPath() ? 'gone' : 'idle'))
-  // 3D zarf: 'wait' yükleniyor, 'on' hazır, 'off' desteklenmiyor (eski zarf gösterilir)
-  const [three, setThree] = useState(() => (hasWebGL() && !isLite() ? 'wait' : 'off'))
+  // 3D zarf: 'wait' yükleniyor (bu sırada hafif zarf görünür), 'on' hazır,
+  // 'css' 3D'den vazgeçildi ama yerleşim aynı kaldı, 'off' 3D hiç denenmedi
+  const [three, setThree] = useState(() => (WANT_3D ? 'wait' : 'off'))
   useEffect(() => {
     if (three !== 'wait') return undefined
-    const t = setTimeout(() => setThree((v) => (v === 'wait' ? 'off' : v)), 5000)
+    const t = setTimeout(() => setThree((v) => (v === 'wait' ? 'css' : v)), 15000)
     return () => clearTimeout(t)
   }, [three])
 
@@ -55,6 +60,8 @@ export default function Intro({ onOpen, guestName }) {
     setState('opening')
     onOpen(true)
     const is3d = three === 'on'
+    // 3D henüz hazır değilken dokunulursa açılış hafif zarfla devam eder
+    if (three === 'wait') setThree('css')
     setTimeout(() => setState('leaving'), is3d ? 3000 : 2300)
     setTimeout(() => setState('gone'), is3d ? 4400 : 3400)
   }
@@ -62,7 +69,7 @@ export default function Intro({ onOpen, guestName }) {
   if (state === 'gone') return null
 
   return (
-    <div className={`intro intro--${state} ${three === 'on' ? 'intro--3d' : ''}`} onClick={open}
+    <div className={`intro intro--${state} ${three === 'off' ? '' : 'intro--3d'}`} onClick={open}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && open()}
       role="button" tabIndex={0} aria-label="Davetiyeyi aç">
       <div className="intro__dust" aria-hidden="true">
@@ -75,15 +82,15 @@ export default function Intro({ onOpen, guestName }) {
         {guestName ? <>Sevgili {guestName},<br />bir davetiyeniz var</> : 'Bir davetiyeniz var'}
       </p>
 
-      {three !== 'off' && (
+      {(three === 'wait' || three === 'on') && (
         <Suspense fallback={null}>
           <Envelope3D opening={state !== 'idle'} colors={themeColors(config)} initials={config.initials}
             card={{ kicker: config.eventType, groom: `${config.groom.first} ${config.groom.last}`, bride: `${config.bride.first} ${config.bride.last}`, date: `${d.day} · ${d.month} · ${d.year}` }}
-            onReady={() => setThree('on')} onFail={() => setThree('off')} />
+            onReady={() => setThree((v) => (v === 'wait' ? 'on' : v))} onFail={() => setThree('css')} />
         </Suspense>
       )}
 
-      <div className={`env ${three === 'off' ? '' : 'env--hidden'}`}>
+      <div className={`env ${three === 'on' ? 'env--out' : ''}`}>
         <div className="env__glow" />
         <div className="env__float">
           <div className="env__back" />

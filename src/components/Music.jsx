@@ -67,7 +67,7 @@ const Music = forwardRef(function Music(_, ref) {
 
   return (
     <>
-      <audio ref={audio} src={config.music} loop preload="auto" onError={() => setAvailable(false)} />
+      <audio ref={audio} src={config.music} loop preload="none" onError={() => setAvailable(false)} />
       <button type="button" className={`music ${playing ? 'music--on' : ''} ${tucked ? 'music--tucked' : ''}`}
         onClick={(e) => { e.stopPropagation(); toggle() }}
         onTouchEnd={(e) => e.stopPropagation()}

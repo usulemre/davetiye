@@ -2080,3 +2080,11 @@ a { color: inherit; }
 .gsend__row { display: flex; justify-content: space-between; margin: 10px 0 4px; }
 .gsend--done { text-align: center; }
 .gsend__big { margin: 0; font-size: 44px; }
+
+/* 3D zarf hazır olunca hafif zarf yumuşakça kaybolur */
+.env--out { opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+.intro--3d .env { position: relative; z-index: 1; }
+
+/* el yazısı yazı tipi kaldırıldı: kalan yerler ince italik serif */
+:root { --script: 'Cormorant Garamond', 'Times New Roman', serif; }
+.invite__amp, .chapter h3, .cal__head, .when__done, .picker__q, .card__logo, .post__avatar, .outro__text em, .heading em, .intro__names, .env__card-names, .rsvp__title, .outro__mono { font-style: italic; }
