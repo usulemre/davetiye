@@ -134,32 +134,3 @@ export function useTilt(max = 10) {
   }, [max])
   return ref
 }
-
-
-// El çizimi görünümlü çiçek dalı (köşe süsü)
-const LEAVES = [[34, 22, 28], [62, 44, 55], [80, 74, 30], [98, 104, 70], [112, 140, 38], [138, 172, 80], [166, 194, 50]]
-const BUDS = [[22, 34, -150], [88, 58, -130], [126, 118, -120], [156, 160, -110]]
-const FLOWERS = [[52, 30, 13], [104, 88, 11], [146, 190, 14]]
-
-export function Floral({ className = '' }) {
-  return (
-    <svg className={`floral ${className}`} viewBox="0 0 220 220" aria-hidden="true">
-      <path className="floral__stem" d="M2 2C40 18 70 40 86 72s24 70 46 100 52 40 86 46" />
-      {BUDS.map(([x, y, a], i) => (
-        <path key={`b${i}`} className="floral__twig" d={`M${x} ${y}q-6 -10 -16 -14`} transform={`rotate(${a + 150} ${x} ${y})`} />
-      ))}
-      {LEAVES.map(([x, y, a], i) => (
-        <path key={`l${i}`} className="floral__leaf" style={{ '--i': i }}
-          d="M0 0C6-9 20-10 28 0 20 10 6 9 0 0Z" transform={`translate(${x} ${y}) rotate(${a})`} />
-      ))}
-      {FLOWERS.map(([x, y, r], i) => (
-        <g key={`f${i}`} className="floral__flower" style={{ '--i': i }} transform={`translate(${x} ${y})`}>
-          {[0, 72, 144, 216, 288].map((a) => (
-            <ellipse key={a} cx="0" cy={-r * 0.55} rx={r * 0.42} ry={r * 0.62} transform={`rotate(${a})`} />
-          ))}
-          <circle r={r * 0.26} className="floral__heart" />
-        </g>
-      ))}
-    </svg>
-  )
-}

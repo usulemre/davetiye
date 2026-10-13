@@ -2,7 +2,7 @@ import { useSite } from '../site'
 import { formatDate, googleCalendarUrl, downloadICS } from '../date'
 import { useCountdown } from '../hooks'
 import Section from './Section'
-import { SplitText, Particles, Floral } from '../fx'
+import { SplitText } from '../fx'
 import { useNow, phaseOf, currentStep } from '../live'
 import { makeStoryImage } from '../story'
 import Weather from './Weather'
@@ -209,9 +209,6 @@ export function Outro({ onCopy, onAdmin, isAdmin, notify }) {
 
   return (
     <footer id="son" className="outro">
-      <Particles kind="petal" count={10} />
-      <Floral className="outro__fl outro__fl--l" />
-      <Floral className="outro__fl outro__fl--r" />
       <div className="outro__content">
         <p className="outro__text">Gelmeniz bizim için<br /><em>en büyük hediye</em></p>
         <p className="outro__small">(Ama altın da fena olmaz 😇)</p>
