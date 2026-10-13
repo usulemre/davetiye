@@ -51,6 +51,25 @@ export default function Rings3D({ gold = '#c9a46c', play = true }) {
     ringHolder.add(rings)
     scene.add(ringHolder)
 
+    // Alyansların etrafında ince altın yörünge halkaları
+    const halos = []
+    const haloMat = new THREE.MeshPhysicalMaterial({ color: gold, metalness: 1, roughness: 0.25, transparent: true, opacity: 0.55 })
+    for (const [r, tilt, speed] of [[2.05, 1.15, 0.12], [2.45, 1.35, -0.08], [1.75, 0.95, 0.18]]) {
+      const halo = new THREE.Mesh(new THREE.TorusGeometry(r, 0.006, 8, 220), haloMat)
+      halo.rotation.set(tilt, 0, 0)
+      halo.userData.speed = speed
+      // yörüngede küçük altın boncuk
+      const bead = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 12), yellow)
+      bead.position.x = r
+      halo.add(bead)
+      scene.add(halo)
+      halos.push(halo)
+    }
+
+    // Işıl ışıl altın tozu
+    const dust = makeDust(small ? 140 : 260, gold)
+    scene.add(dust)
+
     // Cam küreler ve kalpler
     // Arka plan saydam olduğu için kırılma yerine parlak, gökkuşağı yansımalı cam
     const glass = new THREE.MeshPhysicalMaterial({
@@ -140,6 +159,16 @@ export default function Rings3D({ gold = '#c9a46c', play = true }) {
       ringHolder.scale.setScalar(0.4 + e * 0.6)
       ringHolder.rotation.x = (1 - e) * -1.2
 
+      for (const h of halos) {
+        h.rotation.z = t * h.userData.speed
+        h.rotation.y = Math.sin(t * 0.2 + h.userData.speed * 10) * 0.25
+        h.scale.setScalar(0.3 + e * 0.7)
+        h.position.y = ringHolder.position.y
+      }
+      dust.rotation.y = t * 0.03
+      dust.position.y = sy * 0.8
+      dust.material.opacity = e * (0.75 + Math.sin(t * 1.7) * 0.2)
+
       for (const m of floaters) {
         const d = m.userData
         m.position.set(
@@ -169,7 +198,7 @@ export default function Rings3D({ gold = '#c9a46c', play = true }) {
       window.removeEventListener('pointercancel', onUp)
       scene.traverse((o) => {
         o.geometry?.dispose()
-        if (o.material) [].concat(o.material).forEach((m) => m.dispose())
+        if (o.material) [].concat(o.material).forEach((m) => { m.map?.dispose(); m.dispose() })
       })
       scene.environment?.dispose()
       pmrem.dispose()
@@ -228,6 +257,34 @@ function makeDiamond(radius) {
   g.rotation.z = -Math.PI / 2
   g.position.set(radius + 0.29, 0, 0)
   return g
+}
+
+// Yuvarlak, yumuşak kenarlı altın toz zerreleri
+function makeDust(count, gold) {
+  const c = document.createElement('canvas')
+  c.width = c.height = 64
+  const x = c.getContext('2d')
+  const grd = x.createRadialGradient(32, 32, 0, 32, 32, 32)
+  grd.addColorStop(0, 'rgba(255,255,255,1)')
+  grd.addColorStop(0.25, 'rgba(255,240,210,.9)')
+  grd.addColorStop(1, 'rgba(255,220,170,0)')
+  x.fillStyle = grd
+  x.fillRect(0, 0, 64, 64)
+  const pos = new Float32Array(count * 3)
+  for (let i = 0; i < count; i++) {
+    const r = 1.4 + Math.random() * 3.6
+    const a = Math.random() * Math.PI * 2
+    pos[i * 3] = Math.cos(a) * r
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 4.2
+    pos[i * 3 + 2] = Math.sin(a) * r - 1
+  }
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+  const mat = new THREE.PointsMaterial({
+    size: 0.09, map: new THREE.CanvasTexture(c), color: new THREE.Color(gold).lerp(new THREE.Color('#fff4dc'), 0.15),
+    transparent: true, depthWrite: false, sizeAttenuation: true,
+  })
+  return new THREE.Points(geo, mat)
 }
 
 function heartGeometry() {

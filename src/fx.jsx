@@ -69,6 +69,41 @@ export function useScrollFx(bar) {
   }, [bar])
 }
 
+// Bölüm kartları ekrana girerken arkaya yatık, aşağıdan doğrulup yerine oturur.
+// Kaydırmaya bağlı olduğu için parmak durunca hareket de durur.
+export function useScroll3D() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const vh = window.innerHeight
+      for (const el of document.querySelectorAll('.section')) {
+        const r = el.getBoundingClientRect()
+        if (r.bottom < -50 || r.top > vh + 50) continue
+        // 0: tam yerinde, 1: ekranın altından yeni giriyor
+        const p = Math.min(1, Math.max(0, (r.top - vh * 0.62) / (vh * 0.38)))
+        const e = p * p
+        el.style.setProperty('--srx', `${(e * 26).toFixed(2)}deg`)
+        el.style.setProperty('--sty', `${(e * 90).toFixed(1)}px`)
+        el.style.setProperty('--ssc', (1 - e * 0.1).toFixed(3))
+        el.style.setProperty('--sop', (1 - e * 0.85).toFixed(3))
+      }
+    }
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    const again = setInterval(onScroll, 1000)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      clearInterval(again)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+}
+
 // Parmak/fare hareketine göre hafif 3D eğilme
 export function useTilt(max = 10) {
   const ref = useRef(null)

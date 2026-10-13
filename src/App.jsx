@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { copyText } from './hooks'
 import { SiteContext, mergeSite, applyTheme } from './site'
-import { useScrollFx } from './fx'
+import { useScrollFx, useScroll3D } from './fx'
 import { getAdminKey, verifyAdmin, logout as endSession, isLoginPath } from './admin'
 import Intro from './components/Intro'
 import Music from './components/Music'
@@ -35,6 +35,7 @@ export default function App() {
   const music = useRef(null)
   const bar = useRef(null)
   useScrollFx(bar)
+  useScroll3D()
 
   // Kaydedilmiş site ayarlarını yükle
   useEffect(() => {

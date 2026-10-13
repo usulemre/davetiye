@@ -1645,3 +1645,46 @@ a { color: inherit; }
 @media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
 .hero__first { padding-bottom: .16em; margin-bottom: -.12em; clip-path: inset(-30% 100% -30% 0); }
 @keyframes write { to { clip-path: inset(-30% -5% -30% 0); } }
+
+/* ---------- kaydırmaya bağlı 3D kartlar ---------- */
+.section.reveal, .section.reveal.is-visible {
+  opacity: var(--sop, 1);
+  transform: perspective(1300px) translate3d(0, var(--sty, 0px), 0) rotateX(var(--srx, 0deg)) scale(var(--ssc, 1));
+  transform-origin: 50% 0;
+  transition: none;
+  will-change: transform, opacity;
+}
+
+/* kart kenarında dönen altın parıltı */
+@property --ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.section:not(.story):not(.gold)::after, .gold::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  border-radius: 40px; padding: 1.2px;
+  background: conic-gradient(from var(--ang), transparent 0 55%, color-mix(in srgb, var(--champagne) 85%, #fff) 70%, transparent 85%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: borderSpin 9s linear infinite;
+}
+@keyframes borderSpin { to { --ang: 360deg; } }
+
+/* kartların üst kenarında ışık yansıması */
+.section:not(.story) > .kicker:first-child { margin-top: 2px; }
+.section::before, .bento > .section::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, 0) 26%),
+    linear-gradient(160deg, rgba(255, 255, 255, .58), rgba(255, 255, 255, .24));
+}
+
+/* geri sayım: cam küpler */
+.countdown { gap: 12px; perspective: 600px; }
+.countdown > div {
+  border-radius: 20px; width: 70px; height: 76px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, .45));
+  transform: rotateX(14deg); transform-style: preserve-3d;
+  box-shadow: 0 2px 0 rgba(255, 255, 255, .9) inset, 0 -10px 0 -4px color-mix(in srgb, var(--champagne-hi) 50%, transparent) inset, 0 22px 30px -18px color-mix(in srgb, var(--ink) 60%, transparent);
+}
+.countdown__num { font-size: 30px; font-weight: 400; }
+
+@media (prefers-reduced-motion: reduce) {
+  .section::after, .gold::after { animation: none; }
+}
