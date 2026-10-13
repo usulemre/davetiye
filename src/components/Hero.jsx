@@ -1,40 +1,47 @@
-import { useSite } from '../site'
+import { Suspense, lazy } from 'react'
+import { useSite, themeColors } from '../site'
 import { formatDate } from '../date'
-import { Particles, Floral } from '../fx'
+import { useTilt } from '../fx'
 
-export default function Hero() {
+const Rings3D = lazy(() => import('./Rings3D'))
+
+export default function Hero({ opened }) {
   const config = useSite()
   const d = formatDate(config.start)
+  const tilt = useTilt(12)
   return (
     <header className="hero">
-      <Particles kind="petal" count={14} />
-      <Floral className="hero__fl hero__fl--l" />
-      <Floral className="hero__fl hero__fl--r" />
+      <div className="hero__stage">
+        <Suspense fallback={null}>
+          <Rings3D gold={themeColors(config).champagne} play={opened} />
+        </Suspense>
+      </div>
 
       <div className="hero__inner">
         <p className="kicker hero__kicker">Evleniyoruz</p>
         <h1 className="hero__names">
           <span className="hero__name">
-            <span className="script">{config.groom.first}</span>
+            <span className="hero__first">{config.groom.first}</span>
             <small>{config.groom.last}</small>
           </span>
           <em>&amp;</em>
           <span className="hero__name">
-            <span className="script">{config.bride.first}</span>
+            <span className="hero__first">{config.bride.first}</span>
             <small>{config.bride.last}</small>
           </span>
         </h1>
 
-        <div className="hero__oval">
-          <img src={config.heroPhoto} alt={`${config.groom.first} ve ${config.bride.first}`} />
-        </div>
-
-        <p className="hero__date">
+        <p className="hero__date glass">
           <span>{d.weekday}</span>
           <b>{d.day}</b>
           <span>{d.monthName} {d.year}</span>
         </p>
         <p className="hero__venue">{config.venue.name} · Saat {d.time}</p>
+
+        <div className="hero__frame" ref={tilt}>
+          <img src={config.heroPhoto} alt={`${config.groom.first} ve ${config.bride.first}`} />
+          <span className="hero__badge glass">{d.day}.{d.month}.{d.year}</span>
+        </div>
       </div>
 
       <a href="#davet" className="hero__scroll" aria-label="Aşağı kaydır">

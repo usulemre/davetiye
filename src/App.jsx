@@ -6,6 +6,7 @@ import { getAdminKey, verifyAdmin, logout as endSession, isLoginPath } from './a
 import Intro from './components/Intro'
 import Music from './components/Music'
 import Hero from './components/Hero'
+import Orbs from './components/Orbs'
 import Story from './components/Story'
 import Gold from './components/Gold'
 import Memories from './components/Memories'
@@ -126,7 +127,8 @@ export default function App() {
       <div className="progress" ref={bar} aria-hidden="true" />
       <Music key={site.music} ref={music} />
       <main className={`page ${opened ? 'page--opened' : ''}`}>
-        <Hero />
+        <Orbs />
+        <Hero opened={opened} />
         <Invite guestName={guest?.name} />
         {show.story !== false && site.story?.length > 0 && <Story />}
         <div className="bento">
