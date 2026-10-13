@@ -116,7 +116,11 @@ export default function Album() {
             const flipped = i < page
             return (
               <div key={i} className={`album__leaf ${flipped ? 'is-flipped' : ''} ${i === 0 ? 'album__leaf--cover' : ''} ${i === leaves - 1 ? 'album__leaf--last' : ''}`}
-                style={{ zIndex: flipped ? i + 1 : leaves - i }}
+                style={{
+                  zIndex: flipped ? i + 1 : leaves - i,
+                  // Safari 3D sahnede z-index'i yok sayar: sıra derinlikle (translateZ) de verilir
+                  transform: flipped ? `rotateY(-180deg) translateZ(${-(i + 1) * 0.6}px)` : `rotateY(0deg) translateZ(${-i * 0.6}px)`,
+                }}
                 onClick={() => (flipped ? go(-1) : go(1))}>
                 <div className="album__face album__face--front">{front(i)}</div>
                 <div className="album__face album__face--back">{back(i)}</div>

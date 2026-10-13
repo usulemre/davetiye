@@ -2055,7 +2055,7 @@ a { color: inherit; }
   transition: transform 1.05s cubic-bezier(.45, .05, .25, 1);
   cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
-.album__leaf.is-flipped { transform: rotateY(-180deg); }
+.album__face--front { transform: rotateY(0deg) translateZ(.1px); }
 .album__face {
   position: absolute; inset: 0; overflow: hidden; border-radius: 4px 14px 14px 4px;
   backface-visibility: hidden; -webkit-backface-visibility: hidden;
@@ -2065,7 +2065,7 @@ a { color: inherit; }
   box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 18px 40px -26px color-mix(in srgb, var(--ink) 70%, transparent);
 }
 .album__face--back {
-  transform: rotateY(180deg); border-radius: 14px 4px 4px 14px;
+  transform: rotateY(180deg) translateZ(.1px); border-radius: 14px 4px 4px 14px;
   background:
     linear-gradient(270deg, rgba(60, 40, 30, .16), rgba(60, 40, 30, 0) 7%),
     linear-gradient(200deg, #fffdf9, #f4ece2);
@@ -2098,7 +2098,7 @@ a { color: inherit; }
 .album__cover-date { font-family: var(--serif); font-size: 17px; letter-spacing: .14em; }
 .album__cover-hint { position: absolute; bottom: 22px; font-size: 10px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; opacity: .8; animation: hintPulse 2.4s ease-in-out infinite; }
 .album__leaf--cover:not(.is-flipped) { animation: coverTease 3.2s ease-in-out 1.5s infinite; }
-@keyframes coverTease { 0%, 80%, 100% { transform: rotateY(0); } 88% { transform: rotateY(-14deg); } }
+@keyframes coverTease { 0%, 80%, 100% { transform: rotateY(0deg); } 88% { transform: rotateY(-14deg); } }
 
 /* fotoğraf sayfası */
 .album__photo { position: absolute; inset: 0; margin: 0; padding: 16px 16px 12px 22px; display: flex; flex-direction: column; gap: 10px; }
@@ -2125,3 +2125,10 @@ a { color: inherit; }
 .album__nav button { width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 50%; background: rgba(255, 255, 255, .8); color: var(--ink); font-size: 22px; line-height: 1; }
 .album__nav button:disabled { opacity: .35; }
 @media (prefers-reduced-motion: reduce) { .album__leaf { transition-duration: .01ms; } .album__leaf--cover { animation: none !important; } }
+
+/* Safari arka yüz gizlemeyi her zaman uygulamıyor: yüzler çevrilmenin tam ortasında
+   (sayfa dik, görünmezken) değişir; her tarayıcıda aynı sonuç */
+.album__face--back { visibility: hidden; transition: visibility 0s linear .5s; }
+.album__face--front { visibility: visible; transition: visibility 0s linear .5s, opacity 1.05s ease; }
+.album__leaf.is-flipped .album__face--back { visibility: visible; }
+.album__leaf.is-flipped .album__face--front { visibility: hidden; }
