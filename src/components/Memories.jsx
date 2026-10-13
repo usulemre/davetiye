@@ -206,6 +206,12 @@ function Composer({ name, onName, onPosted, notify }) {
     }
     setBusy(true)
     try {
+      const check = await fetch(`/api/upload?kind=${file.type.startsWith('video/') ? 'video' : 'photo'}`).then((r) => r.json()).catch(() => ({}))
+      if (check.error) {
+        const err = new Error(check.error)
+        err.step = 'limit'
+        throw err
+      }
       let body
       if (file.type.startsWith('video/')) {
         const info = await videoInfo(file).catch(() => null)
@@ -214,8 +220,9 @@ function Composer({ name, onName, onPosted, notify }) {
           err.step = 'video'
           throw err
         }
-        const poster = info?.poster ? await uploadBlob('anilar', info.poster).catch(() => '') : ''
+        // önce video (reddedilirse boşta kapak karesi kalmasın), sonra kapak karesi
         const url = await uploadBlob('anilar', file, { onProgress: setProgress })
+        const poster = info?.poster ? await uploadBlob('anilar', info.poster).catch(() => '') : ''
         body = { url, name, caption, type: 'video', poster, width: info?.width || 0, height: info?.height || 0 }
       } else {
         const { blob, width, height } = await shrink(file)
@@ -227,8 +234,10 @@ function Composer({ name, onName, onPosted, notify }) {
       notify('Paylaşıldı! 🎉')
       reset()
     } catch (err) {
-      report(err.step || 'upload', err, file)
-      notify(err.step ? err.message : 'Yüklenemedi, internetini kontrol edip tekrar dene')
+      if (err.step !== 'limit') report(err.step || 'upload', err, file)
+      // sunucunun anlaşılır uyarıları (depolama dolu, saatlik video sınırı) olduğu gibi gösterilir
+      const known = /Depolama|video|saat|yükleme/i.test(err?.message || '')
+      notify(err.step || known ? err.message.replace(/^.*?(Depolama|Bir saatte)/, '$1') : 'Yüklenemedi, internetini kontrol edip tekrar dene')
     } finally {
       setBusy(false)
     }

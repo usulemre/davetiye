@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { Redis } from '@upstash/redis'
+import { list } from '@vercel/blob'
 
 let redis
 export function db() {
@@ -22,6 +23,11 @@ export async function rateLimit(req, action, max, window) {
   const count = await db().incr(key)
   if (count === 1) await db().expire(key, window)
   return count <= max
+}
+
+// Sınıra ulaşılmış mı (sayacı artırmadan bakar)
+export async function rateLimitReached(req, action, max) {
+  return Number(await db().get(`rl:${action}:${clientIp(req)}`)) >= max
 }
 
 // Yönetici oturumu: girişte verilen token Redis'te 30 gün saklanır
@@ -72,3 +78,38 @@ export function cleanRsvp(input, seats) {
   const song = input.status === 'yes' ? clean(input.song, 120) : ''
   return { status: input.status, count, note: clean(input.note, 300), ...(song ? { song } : {}), at: Date.now() }
 }
+
+// Depolama kullanımı (bayt). Her yüklemede liste çekmemek için 1 dakika saklanır.
+export async function storageUsage(fresh = false) {
+  const key = `${process.env.DATA_PREFIX || ''}usage:blob`
+  if (!fresh) {
+    const cached = await db().get(key)
+    if (cached) return cached
+  }
+  const out = { total: 0, count: 0, memories: 0, videos: 0, site: 0 }
+  let cursor
+  do {
+    const page = await list({ cursor, limit: 1000 })
+    for (const b of page.blobs) {
+      out.total += b.size
+      out.count += 1
+      if (b.pathname.startsWith('anilar/')) {
+        out.memories += b.size
+        if (/\.(mp4|mov|webm)$/i.test(b.pathname)) out.videos += 1
+      } else {
+        out.site += b.size
+      }
+    }
+    cursor = page.hasMore ? page.cursor : undefined
+  } while (cursor)
+  await db().set(key, out, { ex: 60 })
+  return out
+}
+
+// Ücretsiz depolama alanı (yaklaşık) ve misafir yüklemelerinin durdurulacağı eşikler
+export const STORAGE_LIMIT = 1024 * 1024 * 1024
+export const VIDEO_STOP = 0.8
+export const PHOTO_STOP = 0.95
+
+// Dilek ve yorumlarda bağlantı (reklam) engeli
+export const hasLink = (text) => /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|net|org|xyz|tk|ru|info|biz|io|me|link|site|online)\b)/i.test(String(text || ''))

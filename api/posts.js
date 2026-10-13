@@ -1,5 +1,5 @@
 import { del } from '@vercel/blob'
-import { db, rateLimit, isAdmin, clean, isOurBlob } from './_lib.js'
+import { db, rateLimit, isAdmin, clean, isOurBlob, hasLink } from './_lib.js'
 
 // Yerel testlerde canlı veriye dokunmamak için (DATA_PREFIX=test:)
 const P = process.env.DATA_PREFIX || ''
@@ -49,6 +49,7 @@ export default async function handler(req, res) {
       const { url, name, caption, width, height, type, poster } = req.body || {}
       const author = clean(name, 40)
       if (!isOurBlob(url) || !author) return res.status(400).json({ error: 'Eksik bilgi' })
+      if (hasLink(caption)) return res.status(400).json({ error: 'Nota bağlantı (link) eklenemiyor' })
       const video = type === 'video'
       if (video && poster && !isOurBlob(poster)) return res.status(400).json({ error: 'Eksik bilgi' })
       if (!(await rateLimit(req, 'post', 30, 3600))) {

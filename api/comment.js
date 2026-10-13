@@ -1,4 +1,4 @@
-import { db, rateLimit, isAdmin, clean } from './_lib.js'
+import { db, rateLimit, isAdmin, clean, hasLink } from './_lib.js'
 
 // Yerel testlerde canlı veriye dokunmamak için (DATA_PREFIX=test:)
 const P = process.env.DATA_PREFIX || ''
@@ -10,6 +10,7 @@ export default async function handler(req, res) {
       const name = clean(req.body?.name, 40)
       const text = clean(req.body?.text, 300)
       if (!id || !name || !text) return res.status(400).json({ error: 'Eksik bilgi' })
+      if (hasLink(text) || hasLink(name)) return res.status(400).json({ error: 'Yorumlara bağlantı (link) eklenemiyor' })
       if (!(await db().exists(`${P}post:${id}`))) return res.status(404).json({ error: 'Bulunamadı' })
       if (!(await rateLimit(req, 'comment', 30, 600))) {
         return res.status(429).json({ error: 'Çok hızlı yorum yapıyorsunuz, biraz bekleyin 😄' })

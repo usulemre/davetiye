@@ -1,4 +1,4 @@
-import { db, rateLimit, isAdmin, clean } from './_lib.js'
+import { db, rateLimit, isAdmin, clean, hasLink } from './_lib.js'
 
 // İyi dilekler: misafirlerin bıraktığı kısa mesajlar
 const KEY = `${process.env.DATA_PREFIX || ''}wishes`
@@ -20,6 +20,7 @@ export default async function handler(req, res) {
       const name = clean(req.body?.name, 40)
       const text = clean(req.body?.text, 240)
       if (!name || text.length < 2) return res.status(400).json({ error: 'Lütfen adınızı ve dileğinizi yazın' })
+      if (hasLink(text) || hasLink(name)) return res.status(400).json({ error: 'Dileklere bağlantı (link) eklenemiyor' })
       if (!(await rateLimit(req, 'wish', 6, 600))) return res.status(429).json({ error: 'Çok hızlı gönderiyorsunuz, biraz bekleyin 😄' })
       const emoji = EMOJIS.includes(req.body?.emoji) ? req.body.emoji : EMOJIS[0]
       const wish = { id: Math.random().toString(36).slice(2, 10), name, text, emoji, createdAt: Date.now() }
