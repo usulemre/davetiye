@@ -193,6 +193,21 @@ function AddGuest({ store, notify, bulk, setBulk, onClose }) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const parsed = bulk ? parseGuestLines(text) : []
+  const canPick = typeof navigator !== 'undefined' && 'contacts' in navigator && 'select' in (navigator.contacts || {})
+
+  // Telefon rehberinden seç (Android Chrome); seçilenler toplu listeye yazılır, kontrol edip eklersin
+  const pick = async () => {
+    try {
+      const list = await navigator.contacts.select(['name', 'tel'], { multiple: true })
+      const lines = list.map((c) => [c.name?.[0], c.tel?.[0]].filter(Boolean).join(', ')).filter(Boolean)
+      if (!lines.length) return
+      setBulk(true)
+      setText((t) => [t.trim(), ...lines].filter(Boolean).join('\n'))
+      notify(`${lines.length} kişi listeye yazıldı, kişi sayılarını kontrol edip ekle`)
+    } catch {
+      // rehber penceresi kapatıldı
+    }
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -211,6 +226,7 @@ function AddGuest({ store, notify, bulk, setBulk, onClose }) {
       <div className="gadd__head">
         <h4>Davetli ekle</h4>
         <button type="button" className="alink" onClick={() => setBulk(!bulk)}>{bulk ? 'Tek tek ekle' : 'Toplu ekle (Excel / liste)'}</button>
+        {canPick && <button type="button" className="alink" onClick={pick}>📇 Rehberden seç</button>}
         {onClose && <button type="button" className="admin__icon gadd__x" onClick={onClose} aria-label="Kapat">×</button>}
       </div>
       {bulk ? (

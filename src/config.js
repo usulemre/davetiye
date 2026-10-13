@@ -10,7 +10,7 @@ export const defaults = {
   theme: 'inci',
 
   // Bölümleri gizlemek/göstermek için
-  sections: { story: true, program: true, rsvp: true, faq: true, gold: true, memories: true },
+  sections: { story: true, program: true, rsvp: true, faq: true, gold: true, wishes: true, memories: true },
 
   // Katılım bildirimi için son tarih (ör. "1 Kasım"); boşsa yazılmaz
   rsvpDeadline: '',

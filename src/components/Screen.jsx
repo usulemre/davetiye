@@ -12,6 +12,7 @@ export default function Screen() {
   const config = useSite()
   const d = formatDate(config.start)
   const [posts, setPosts] = useState(null)
+  const [wishes, setWishes] = useState([])
   const [index, setIndex] = useState(0)
   const [fresh, setFresh] = useState(null)
   const [full, setFull] = useState(false)
@@ -23,9 +24,11 @@ export default function Screen() {
     let stop = false
     const load = async () => {
       try {
-        const res = await fetch('/api/posts')
+        const [res, wres] = await Promise.all([fetch('/api/posts'), fetch('/api/wishes').catch(() => null)])
         const data = await res.json()
+        const wdata = wres?.ok ? await wres.json() : { wishes: [] }
         if (stop) return
+        setWishes(wdata.wishes || [])
         const list = (data.posts || []).filter((p) => p.url)
         if (known.current) {
           const added = list.find((p) => !known.current.has(p.id))
@@ -46,17 +49,17 @@ export default function Screen() {
   useEffect(() => {
     if (!fresh || !posts) return
     const i = posts.findIndex((p) => p.id === fresh)
-    if (i >= 0) setIndex(i)
+    if (i >= 0) setIndex(Math.floor(index / posts.length) * posts.length + i)
   }, [fresh, posts])
 
   useEffect(() => {
-    if (!posts?.length) return undefined
+    if (!posts?.length && !wishes.length) return undefined
     const id = setTimeout(() => {
       setFresh(null)
-      setIndex((i) => (i + 1) % posts.length)
+      setIndex((i) => i + 1)
     }, SLIDE)
     return () => clearTimeout(id)
-  }, [index, posts])
+  }, [index, posts, wishes.length])
 
   // Sıradaki fotoğrafı önceden yükle
   useEffect(() => {
@@ -68,11 +71,20 @@ export default function Screen() {
   }
 
   const post = posts?.length ? posts[index % posts.length] : null
+  // her iki fotoğraftan sonra bir dilek; fotoğraf yoksa sadece dilekler döner
+  const wishTurn = wishes.length > 0 && (!posts?.length || (index % 3 === 2 && !fresh))
+  const wish = wishTurn ? wishes[Math.floor(index / 3) % wishes.length] : null
 
   return (
     <div className={`screen ${full ? 'screen--full' : ''}`}>
       <div className="screen__stage">
-        {post ? (
+        {wish ? (
+          <figure key={`w${wish.id}${index}`} className="screen__slide screen__wish">
+            <span aria-hidden="true">{wish.emoji}</span>
+            <blockquote>{wish.text}</blockquote>
+            <figcaption>— {wish.name}</figcaption>
+          </figure>
+        ) : post ? (
           <figure key={post.id} className="screen__slide">
             <img className="screen__blur" src={post.url} alt="" aria-hidden="true" />
             <img className="screen__img" src={post.url} alt={post.caption || `${post.name} paylaştı`} />

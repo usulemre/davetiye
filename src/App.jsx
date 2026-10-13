@@ -14,6 +14,7 @@ import AdminPanel from './components/AdminPanel'
 import Login from './components/Login'
 import Rsvp from './components/Rsvp'
 import Faq from './components/Faq'
+import Wishes from './components/Wishes'
 import GateBar from './components/GateBar'
 import { myCode, linkCode, fetchGuest } from './guests'
 import { Invite, When, Program, Venue, Outro } from './components/Sections'
@@ -153,6 +154,7 @@ export default function App() {
         {show.rsvp !== false && <Rsvp guest={guest} onGuest={setGuest} notify={notify} />}
         {show.faq !== false && <Faq />}
         {show.gold !== false && <Gold onCopy={handleCopy} />}
+        {show.wishes !== false && <Wishes notify={notify} admin={admin} />}
         {show.memories !== false && <Memories notify={notify} admin={admin} />}
         <Outro onCopy={handleCopy} notify={notify} isAdmin={Boolean(admin)} onAdmin={() => setLoginOpen(true)} />
       </main>

@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { useSite, themeColors } from '../site'
 import { isLoginPath } from '../admin'
 import { formatDate } from '../date'
+import { isLite } from '../perf'
 
 const rand = (a, b) => a + Math.random() * (b - a)
 const Envelope3D = lazy(() => import('./Envelope3D'))
@@ -20,7 +21,7 @@ export default function Intro({ onOpen, guestName }) {
   const d = formatDate(config.start)
   const [state, setState] = useState(() => (window.location.hash || isLoginPath() ? 'gone' : 'idle'))
   // 3D zarf: 'wait' yükleniyor, 'on' hazır, 'off' desteklenmiyor (eski zarf gösterilir)
-  const [three, setThree] = useState(() => (hasWebGL() ? 'wait' : 'off'))
+  const [three, setThree] = useState(() => (hasWebGL() && !isLite() ? 'wait' : 'off'))
   useEffect(() => {
     if (three !== 'wait') return undefined
     const t = setTimeout(() => setThree((v) => (v === 'wait' ? 'off' : v)), 5000)

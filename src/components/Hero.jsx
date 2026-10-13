@@ -3,6 +3,9 @@ import { useSite, themeColors } from '../site'
 import { formatDate } from '../date'
 import { useTilt } from '../fx'
 import { useNow, phaseOf } from '../live'
+import { isLite } from '../perf'
+
+const LITE = isLite()
 
 const Rings3D = lazy(() => import('./Rings3D'))
 
@@ -15,9 +18,13 @@ export default function Hero({ opened }) {
   return (
     <header className="hero">
       <div className="hero__stage">
-        <Suspense fallback={null}>
-          <Rings3D gold={themeColors(config).champagne} play={opened} />
-        </Suspense>
+        {LITE ? (
+          <div className="rings-lite" aria-hidden="true"><i /><i /></div>
+        ) : (
+          <Suspense fallback={null}>
+            <Rings3D gold={themeColors(config).champagne} play={opened} />
+          </Suspense>
+        )}
       </div>
 
       <div className="hero__inner">

@@ -231,7 +231,7 @@ export default function AdminPanel({ site, onChange, onSave, onCancel, onLogout,
 
         {tab === 'bolum' && (
           <Group title="Görünen bölümler">
-            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['rsvp', 'Katılım bildirimi (LCV)'], ['faq', 'Sıkça sorulanlar'], ['gold', 'Altın köşesi / IBAN'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
+            {[['story', 'Hikâyemiz'], ['program', 'Günün programı'], ['rsvp', 'Katılım bildirimi (LCV)'], ['faq', 'Sıkça sorulanlar'], ['gold', 'Altın köşesi / IBAN'], ['wishes', 'İyi dilekler'], ['memories', 'Anı Duvarı']].map(([k, label]) => (
               <label key={k} className="atoggle">
                 <input type="checkbox" checked={site.sections[k] !== false}
                   onChange={(e) => setIn('sections', { [k]: e.target.checked })} />

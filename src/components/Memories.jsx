@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Section from './Section'
+import Lightbox from './Lightbox'
 import { useSite } from '../site'
 import { shrink, uploadBlob } from '../images'
 
@@ -35,6 +36,7 @@ async function api(path, options = {}) {
 
 export default function Memories({ notify, admin }) {
   const [zipping, setZipping] = useState(null)
+  const [view, setView] = useState(-1)
   const config = useSite()
   const [posts, setPosts] = useState(null)
   const [error, setError] = useState(null)
@@ -112,6 +114,7 @@ export default function Memories({ notify, admin }) {
 
   return (
     <Section id="anilar" className="memories">
+      {view >= 0 && posts?.[view] && <Lightbox posts={posts} index={view} onIndex={setView} onClose={() => setView(-1)} />}
       <p className="kicker">Anı Duvarı</p>
       <h2 className="heading">O gece, <em>sizin gözünüzden</em></h2>
       <p className="memories__lead">
@@ -152,7 +155,7 @@ export default function Memories({ notify, admin }) {
       ) : (
         <div className="feed">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} liked={liked.has(post.id)} name={name} onName={saveName}
+            <PostCard key={post.id} post={post} onOpen={() => setView(posts.indexOf(post))} liked={liked.has(post.id)} name={name} onName={saveName}
               admin={admin} notify={notify}
               onLike={() => toggleLike(post)}
               onComment={(text) => addComment(post, text)}
@@ -243,21 +246,27 @@ function Composer({ name, onName, onPosted, notify }) {
   )
 }
 
-function PostCard({ post, liked, name, onName, admin, notify, onLike, onComment, onDelete, onDeleteComment }) {
+function PostCard({ post, onOpen, liked, name, onName, admin, notify, onLike, onComment, onDelete, onDeleteComment }) {
   const [burst, setBurst] = useState(false)
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const lastTap = useRef(0)
 
+  const single = useRef(0)
+  // tek dokunuş büyük açar, çift dokunuş beğenir
   const onImageTap = () => {
     const now = Date.now()
+    clearTimeout(single.current)
     if (now - lastTap.current < 300) {
       if (!liked) onLike()
       setBurst(true)
       setTimeout(() => setBurst(false), 800)
+      lastTap.current = 0
+      return
     }
     lastTap.current = now
+    single.current = setTimeout(() => onOpen?.(), 320)
   }
 
   const send = async (e) => {

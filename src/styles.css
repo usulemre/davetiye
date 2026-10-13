@@ -1908,3 +1908,65 @@ a { color: inherit; }
 /* ---------- anı duvarı: toplu indirme ---------- */
 .memories__zip { display: block; margin: -18px auto 28px; padding: 10px 16px; border: 1px dashed var(--champagne); border-radius: 999px; background: rgba(255, 255, 255, .7); color: var(--ink); font-size: 12.5px; font-weight: 700; }
 .memories__zip:disabled { opacity: .7; }
+
+/* ---------- iyi dilekler ---------- */
+.wishes { max-width: 760px; }
+.wishes__lead { max-width: 420px; margin: -8px auto 26px; font-size: 15px; line-height: 1.7; color: var(--stone); }
+.wishes__form { display: grid; gap: 10px; max-width: 460px; margin: 0 auto 34px; padding: 16px; border-radius: 26px; background: rgba(255, 255, 255, .6); border: 1px solid var(--glass-line); text-align: left; }
+.wishes__emojis { display: flex; justify-content: center; gap: 6px; }
+.wishes__emojis button { width: 42px; height: 42px; border: 1px solid transparent; border-radius: 50%; background: rgba(255, 255, 255, .7); font-size: 20px; transition: transform .25s cubic-bezier(.3, 1.6, .5, 1), border-color .2s ease; }
+.wishes__emojis button.is-on { border-color: var(--champagne); transform: scale(1.15); background: #fff; }
+.wishes__form textarea { resize: vertical; font: 16px var(--sans); }
+.wishes__row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.wishes__row .btn { min-width: 0; padding: 13px 20px; }
+.wishes__count { justify-self: end; margin-top: -4px; font-size: 11px; color: var(--stone); }
+.wishes__wall { columns: 2 230px; column-gap: 14px; text-align: left; }
+.wish {
+  position: relative; break-inside: avoid; margin: 0 0 14px; padding: 18px 18px 14px; border-radius: 22px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .6));
+  border: 1px solid var(--glass-line);
+  box-shadow: 0 22px 40px -30px color-mix(in srgb, var(--ink) 60%, transparent);
+  transform: rotate(var(--r)); transition: transform .4s var(--ease);
+}
+.wish:hover { transform: rotate(0) translateY(-3px); }
+.wish--fresh { animation: wishIn .8s cubic-bezier(.3, 1.4, .5, 1); }
+@keyframes wishIn { from { opacity: 0; transform: translateY(-20px) scale(.9) rotate(-6deg); } }
+.wish__emoji { position: absolute; top: -12px; left: 16px; font-size: 24px; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .12)); }
+.wish blockquote { margin: 6px 0 10px; font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.4; color: var(--ink); word-break: break-word; }
+.wish figcaption { font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--champagne); }
+.wish__del { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 1px solid #b5483a; border-radius: 50%; background: #fff; color: #b5483a; line-height: 1; }
+.wishes__more { margin-top: 10px; }
+
+/* ---------- fotoğraf görüntüleyici ---------- */
+.lb { position: fixed; inset: 0; z-index: 260; display: grid; grid-template-rows: 1fr auto; background: rgba(18, 14, 14, .94); color: #fff; animation: appear .3s ease; touch-action: none; }
+.lb__stage { display: grid; place-items: center; min-height: 0; padding: 56px 12px 0; }
+.lb__stage img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; user-select: none; -webkit-user-drag: none; animation: lbIn .35s var(--ease); }
+@keyframes lbIn { from { opacity: 0; scale: .96; } }
+.lb__cap { padding: 14px 20px calc(18px + env(safe-area-inset-bottom)); text-align: center; }
+.lb__cap strong { font-size: 15px; }
+.lb__cap p { margin: 4px 0; font-family: var(--serif); font-style: italic; font-size: 18px; }
+.lb__cap span { font-size: 12px; opacity: .7; }
+.lb__close { position: absolute; z-index: 2; top: calc(12px + env(safe-area-inset-top)); right: 12px; width: 42px; height: 42px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .14); color: #fff; font-size: 26px; line-height: 1; }
+.lb__count { position: absolute; top: calc(22px + env(safe-area-inset-top)); left: 18px; font-size: 13px; opacity: .7; }
+.lb__nav { position: absolute; z-index: 2; top: 45%; width: 46px; height: 46px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .14); color: #fff; font-size: 30px; line-height: 1; }
+.lb__nav--l { left: 12px; }
+.lb__nav--r { right: 12px; }
+@media (hover: none) { .lb__nav { display: none; } }
+.post__media { cursor: zoom-in; }
+
+/* ---------- dev ekran: dilek slaytı ---------- */
+.screen__wish { display: grid; place-content: center; justify-items: center; gap: 2vh; padding: 8vh 8vw; text-align: center; background: radial-gradient(60% 50% at 50% 40%, rgba(201, 164, 108, .25), transparent 70%); }
+.screen__wish span { font-size: clamp(48px, 6vw, 96px); }
+.screen__wish blockquote { margin: 0; max-width: 30ch; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(32px, 3.6vw, 64px); line-height: 1.25; }
+.screen__wish figcaption { font-size: clamp(18px, 1.6vw, 28px); font-weight: 700; color: var(--champagne-hi); }
+
+/* ---------- hafif mod: 3D yerine çizim alyanslar ---------- */
+.rings-lite { position: absolute; inset: 0; display: grid; place-items: center; }
+.rings-lite i { position: absolute; width: min(36vw, 170px); aspect-ratio: 1; border-radius: 50%; border: min(3.4vw, 15px) solid transparent;
+  background: linear-gradient(var(--paper), var(--paper)) padding-box, linear-gradient(135deg, color-mix(in srgb, var(--champagne-hi) 70%, #fff), var(--champagne) 45%, color-mix(in srgb, var(--champagne) 60%, var(--ink))) border-box;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--champagne-hi) 70%, #fff), var(--champagne) 45%, color-mix(in srgb, var(--champagne) 60%, var(--ink))) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  filter: drop-shadow(0 18px 20px rgba(80, 50, 20, .25)); }
+.rings-lite i:first-child { translate: -24% 0; }
+.rings-lite i:last-child { translate: 24% 0; rotate: 20deg; }
+.gadd__head .alink + .alink { margin-left: 4px; }
