@@ -233,6 +233,10 @@ function makeTable(t, isSel) {
     chair.rotation.y = a
     g.add(chair)
     if (s) {
+      const person = makePerson(s.color, i + t.name.length * 3, i >= 10)
+      person.position.copy(chair.position)
+      person.rotation.y = a
+      g.add(person)
       const plate = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.11, 0.015, 32), mat(0xffffff, { roughness: 0.3 })))
       plate.position.set(Math.sin(a) * 0.68, 0.79, Math.cos(a) * 0.68)
       const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.02, 0.12, 16), mat(0xdfeaf0, { transparent: true, opacity: 0.55, roughness: 0.05 }))
@@ -245,7 +249,7 @@ function makeTable(t, isSel) {
         tag.textContent = s.initial
         tag.style.background = s.color
         const obj = new CSS2DObject(tag)
-        obj.position.set(Math.sin(a) * 1.55, 1.25, Math.cos(a) * 1.55)
+        obj.position.set(Math.sin(a) * 1.62, 1.5, Math.cos(a) * 1.62)
         g.add(obj)
       }
     }
@@ -297,6 +301,92 @@ function makeChair(color, over) {
     bar.rotation.z = Math.PI / 2
     bar.position.set(0, y, 0.18)
     g.add(bar)
+  }
+  return g
+}
+
+// Sandalyede oturan misafir: kıyafet rengi ailenin rengi, ten ve saç her yerde biraz farklı
+const SKINS = [0xf1c9a5, 0xe0ac85, 0xc68e64, 0xf5d5bc, 0xd9a07a]
+const HAIRS = [0x2b1d16, 0x4a3022, 0x7a5236, 0x1c1714, 0xa77b4f, 0x5c5552]
+const LEGS = [0x2f2a36, 0x3b3a48, 0x4a3b3a]
+const cap = (r, len) => new THREE.CapsuleGeometry(r, len, 6, 12)
+const limb = (geo, m, from, to) => {
+  const mesh = new THREE.Mesh(geo, m)
+  const a = new THREE.Vector3(...from)
+  const b = new THREE.Vector3(...to)
+  mesh.position.copy(a).add(b).multiplyScalar(0.5)
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.sub(a).normalize())
+  mesh.castShadow = true
+  return mesh
+}
+
+function makePerson(color, seed, over) {
+  const g = new THREE.Group()
+  const woman = seed % 2 === 0
+  const skin = mat(SKINS[seed % SKINS.length], { roughness: 0.7 })
+  const hair = mat(HAIRS[(seed * 7) % HAIRS.length], { roughness: 0.8 })
+  const cloth = mat(color || 0xd8c8c0, { roughness: 0.75 })
+  if (over) cloth.emissive = new THREE.Color(0x802010)
+  const legs = woman ? cloth : mat(LEGS[seed % LEGS.length], { roughness: 0.8 })
+
+  // Bacaklar: oturuk uyluk ve yere inen baldır (masa -z yönünde)
+  for (const x of [-0.08, 0.08]) {
+    g.add(limb(cap(0.062, 0.26), legs, [x, 0.56, 0.06], [x, 0.56, -0.26]))
+    g.add(limb(cap(0.05, 0.42), legs, [x, 0.53, -0.28], [x, 0.04, -0.3]))
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.05, 0.16), mat(0x1e1a1a, { roughness: 0.5 }))
+    shoe.position.set(x, 0.025, -0.34)
+    g.add(shoe)
+  }
+  // Kadınlarda uzun etek
+  if (woman) {
+    const skirt = shadowed(new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.42, 20), cloth))
+    skirt.position.set(0, 0.36, -0.22)
+    g.add(skirt)
+  }
+
+  // Gövde, omuzlar ve kollar masaya uzanır
+  const torso = shadowed(new THREE.Mesh(cap(0.13, 0.26), cloth))
+  torso.scale.set(woman ? 1.05 : 1.2, 1, 0.75)
+  torso.position.set(0, 0.84, 0.05)
+  torso.rotation.x = -0.08
+  g.add(torso)
+  for (const x of [-1, 1]) {
+    const sh = [x * 0.17, 0.98, 0.05]
+    const el = [x * 0.2, 0.76, -0.12]
+    const hand = [x * 0.12, 0.8, -0.4]
+    g.add(limb(cap(0.045, 0.18), cloth, sh, el))
+    g.add(limb(cap(0.04, 0.22), cloth, el, hand))
+    const palm = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 8), skin)
+    palm.position.set(...hand)
+    g.add(palm)
+  }
+  if (!woman) {
+    // Damatlık havası: beyaz gömlek yakası ve kravat
+    const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 0.02), mat(0xffffff))
+    shirt.position.set(0, 0.98, -0.055)
+    shirt.rotation.x = -0.08
+    const tie = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.16, 0.022), mat(0x3a2f3a))
+    tie.position.set(0, 0.96, -0.062)
+    tie.rotation.x = -0.08
+    g.add(shirt, tie)
+  }
+
+  // Boyun, baş ve saç
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.08, 12), skin)
+  neck.position.set(0, 1.1, 0.04)
+  const head = shadowed(new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 18), skin))
+  head.scale.set(0.95, 1.08, 1)
+  head.position.set(0, 1.23, 0.03)
+  g.add(neck, head)
+  const top = new THREE.Mesh(new THREE.SphereGeometry(0.108, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), hair)
+  top.position.set(0, 1.245, 0.045)
+  top.rotation.x = 0.35
+  g.add(top)
+  if (woman) {
+    const long = shadowed(new THREE.Mesh(cap(0.095, 0.16), hair))
+    long.scale.set(1.1, 1, 0.6)
+    long.position.set(0, 1.12, 0.1)
+    g.add(long)
   }
   return g
 }
